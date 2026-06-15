@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Matching — The Best City Ever</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito',Arial,sans-serif;background:#f0f4ff;min-height:100vh;padding:20px;color:#1e293b}
+  h1{text-align:center;font-size:1.6rem;font-weight:800;color:#1e40af;margin-bottom:6px}
+  .subtitle{text-align:center;color:#64748b;margin-bottom:28px;font-size:.9rem}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:700;transition:all .15s}
+  button:hover{opacity:.88;transform:translateY(-1px)}
+
+.container{max-width:640px;margin:0 auto}
+.score{text-align:center;font-size:1rem;color:#64748b;margin-bottom:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.col{display:flex;flex-direction:column;gap:10px}
+.item{padding:12px 16px;border-radius:12px;border:2.5px solid #e2e8f0;background:white;font-weight:700;font-size:1rem;cursor:pointer;text-align:center;transition:all .2s;user-select:none}
+.item:hover{border-color:#6366f1;background:#eff6ff}
+.item.selected{border-color:#6366f1;background:#eff6ff;transform:scale(1.03)}
+.item.matched{border-color:#22c55e;background:#dcfce7;cursor:default;opacity:.7}
+.item.wrong{border-color:#ef4444;background:#fee2e2;animation:shake .3s}
+.right .item{font-size:1.6rem}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.btn{padding:10px 24px;font-size:1rem;background:#6366f1;color:white;display:block;margin:20px auto 0}
+.celebrate{text-align:center;font-size:1.3rem;font-weight:800;color:#16a34a;margin-top:16px;display:none}
+</style></head><body>
+<div class="container">
+  <h1>🔗 Matching</h1>
+  <p class="subtitle">The Best City Ever · 2do Grado</p>
+  <div class="score">Pares encontrados: <span id="found">0</span> / <span id="total">0</span> &nbsp;|&nbsp; Intentos: <span id="tries">0</span></div>
+  <div class="grid">
+    <div class="col" id="left"></div>
+    <div class="col right" id="right"></div>
+  </div>
+  <div class="celebrate" id="cel">🎉 ¡Excelente! ¡Completaste el matching!</div>
+  <button class="btn" onclick="init()">🔄 Reiniciar</button>
+</div>
+<script>
+const PAIRS=[{"left":"Bank","right":"🏦"},{"left":"Bookstore","right":"📚"},{"left":"Bus Stop","right":"🚌"},{"left":"Computer Store","right":"💻"},{"left":"Gas Station","right":"⛽"},{"left":"Hospital","right":"🏥"},{"left":"Movie Theater","right":"🎬"},{"left":"Music Store","right":"🎵"},{"left":"Park","right":"🌳"},{"left":"Pet Shop","right":"🐾"}];
+let sel=null,found=0,tries=0;
+function init(){
+  found=0;tries=0;sel=null;
+  document.getElementById('found').textContent=0;
+  document.getElementById('tries').textContent=0;
+  document.getElementById('total').textContent=PAIRS.length;
+  document.getElementById('cel').style.display='none';
+  const lArr=[...PAIRS].sort(()=>Math.random()-.5);
+  const rArr=[...PAIRS].sort(()=>Math.random()-.5);
+  const lEl=document.getElementById('left');
+  const rEl=document.getElementById('right');
+  lEl.innerHTML=''; rEl.innerHTML='';
+  lArr.forEach(p=>{const d=document.createElement('div');d.className='item';d.textContent=p.left;d.dataset.key=p.left;d.dataset.side='left';d.onclick=()=>pick(d);lEl.appendChild(d);});
+  rArr.forEach(p=>{const d=document.createElement('div');d.className='item';d.textContent=p.right;d.dataset.key=p.left;d.dataset.side='right';d.onclick=()=>pick(d);rEl.appendChild(d);});
+}
+function pick(el){
+  if(el.classList.contains('matched')||el.classList.contains('wrong')) return;
+  if(!sel){
+    if(el.classList.contains('selected')){el.classList.remove('selected');sel=null;return;}
+    document.querySelectorAll('.item.selected').forEach(x=>x.classList.remove('selected'));
+    sel=el; el.classList.add('selected');
+  } else {
+    if(el===sel){sel=null;el.classList.remove('selected');return;}
+    tries++;
+    document.getElementById('tries').textContent=tries;
+    if(sel.dataset.key===el.dataset.key && sel.dataset.side!==el.dataset.side){
+      sel.classList.replace('selected','matched');
+      el.classList.add('matched');
+      found++; document.getElementById('found').textContent=found;
+      if(found===PAIRS.length){ document.getElementById('cel').style.display='block'; }
+    } else {
+      sel.classList.add('wrong'); el.classList.add('wrong');
+      setTimeout(()=>{ sel.classList.remove('selected','wrong'); el.classList.remove('wrong'); sel=null; },600);
+      return;
+    }
+    sel=null;
+  }
+}
+init();
+</script></body></html>

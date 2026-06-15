@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Memorama — The Best City Ever</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Nunito',Arial,sans-serif;background:#f0f4ff;min-height:100vh;padding:20px;color:#1e293b}
+  h1{text-align:center;font-size:1.6rem;font-weight:800;color:#1e40af;margin-bottom:6px}
+  .subtitle{text-align:center;color:#64748b;margin-bottom:28px;font-size:.9rem}
+  button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;font-weight:700;transition:all .15s}
+  button:hover{opacity:.88;transform:translateY(-1px)}
+
+.container{max-width:520px;margin:0 auto}
+.stats{display:flex;justify-content:center;gap:24px;margin-bottom:16px;font-weight:700;color:#374151}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.card{height:90px;cursor:pointer;border-radius:12px;position:relative;transform-style:preserve-3d;transition:transform .4s}
+.card.flipped,.card.matched{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:12px;display:flex;align-items:center;justify-content:center;backface-visibility:hidden;font-weight:800}
+.back-face{background:#6366f1;font-size:1.8rem;color:white}
+.front-face{transform:rotateY(180deg);background:white;border:2.5px solid #e2e8f0;font-size:.72rem;text-align:center;padding:4px;flex-direction:column;gap:2px}
+.front-face .em{font-size:1.4rem}
+.card.matched .front-face{border-color:#22c55e;background:#dcfce7}
+.btn{padding:10px 24px;font-size:1rem;background:#6366f1;color:white;display:block;margin:16px auto 0}
+.win{text-align:center;font-size:1.2rem;font-weight:800;color:#16a34a;margin-top:12px;display:none}
+</style></head><body>
+<div class="container">
+  <h1>🎮 Memorama</h1>
+  <p class="subtitle">The Best City Ever · 2do Grado</p>
+  <div class="stats"><span>Pares: <span id="found">0</span>/8</span><span>Intentos: <span id="tries">0</span></span><span>⏱ <span id="timer">0s</span></span></div>
+  <div class="grid" id="grid"></div>
+  <div class="win" id="win">🎉 ¡Ganaste! Completaste el memorama.</div>
+  <button class="btn" onclick="init()">🔄 Nuevo juego</button>
+</div>
+<script>
+const PAIRS=[{"word":"Bank","emoji":"🏦"},{"word":"Bookstore","emoji":"📚"},{"word":"Bus Stop","emoji":"🚌"},{"word":"Computer Store","emoji":"💻"},{"word":"Gas Station","emoji":"⛽"},{"word":"Hospital","emoji":"🏥"},{"word":"Movie Theater","emoji":"🎬"},{"word":"Music Store","emoji":"🎵"}];
+let open=[],matched=0,tries=0,lock=false,t=0,timer=null;
+function init(){
+  open=[];matched=0;tries=0;lock=false;t=0;
+  clearInterval(timer);
+  document.getElementById('found').textContent=0;
+  document.getElementById('tries').textContent=0;
+  document.getElementById('timer').textContent='0s';
+  document.getElementById('win').style.display='none';
+  const cards=[...PAIRS.map(p=>({...p,type:'word'})),...PAIRS.map(p=>({...p,type:'emoji'}))].sort(()=>Math.random()-.5);
+  const g=document.getElementById('grid'); g.innerHTML='';
+  cards.forEach((c,i)=>{
+    const d=document.createElement('div'); d.className='card'; d.dataset.idx=i; d.dataset.key=c.word; d.dataset.type=c.type;
+    d.innerHTML=`<div class="face back-face">❓</div><div class="face front-face"><span class="em">${c.type==='emoji'?c.emoji:'🏙️'}</span>${c.type==='word'?c.word:''}</div>`;
+    d.onclick=()=>flip(d); g.appendChild(d);
+  });
+  timer=setInterval(()=>{ t++; document.getElementById('timer').textContent=t+'s'; },1000);
+}
+function flip(d){
+  if(lock||d.classList.contains('flipped')||d.classList.contains('matched')) return;
+  d.classList.add('flipped'); open.push(d);
+  if(open.length===2){
+    lock=true; tries++;
+    document.getElementById('tries').textContent=tries;
+    if(open[0].dataset.key===open[1].dataset.key && open[0].dataset.type!==open[1].dataset.type){
+      open.forEach(x=>x.classList.add('matched'));
+      matched++; document.getElementById('found').textContent=matched;
+      open=[]; lock=false;
+      if(matched===PAIRS.length){ clearInterval(timer); document.getElementById('win').style.display='block'; }
+    } else {
+      setTimeout(()=>{ open.forEach(x=>x.classList.remove('flipped')); open=[]; lock=false; },900);
+    }
+  }
+}
+init();
+</script></body></html>

@@ -116,38 +116,24 @@
 </footer>
 
 <script>
-// ═══════════════════════════════════════════════════════════════
-// CONFIGURACIÓN — agregar aquí cada unidad nueva que se genere
-// ═══════════════════════════════════════════════════════════════
-const UNITS = [
-  {
-    grade:  '2do',
-    unit:   4,
-    name:   'My Best City Ever',
-    emoji:  '🏙️',
-  },
-  // Ejemplo de cómo agregar más unidades:
-  // { grade: '2do', unit: 5, name: 'My Family', emoji: '👨‍👩‍👧‍👦' },
-  // { grade: '5to', unit: 4, name: 'My Best City Ever', emoji: '🏙️' },
-];
-
 const MATERIALS = [
-  { id: 'flashcards', label: 'Flashcards',  emoji: '🃏' },
-  { id: 'matching',   label: 'Matching',    emoji: '🔗' },
-  { id: 'story',      label: 'Story',       emoji: '📖' },
-  { id: 'game',       label: 'Game',        emoji: '🎮' },
+  { id: 'flashcards', label: 'Flashcards', emoji: '🃏' },
+  { id: 'matching',   label: 'Matching',   emoji: '🔗' },
+  { id: 'story',      label: 'Story',      emoji: '📖' },
+  { id: 'game',       label: 'Game',       emoji: '🎮' },
 ];
 
-// ─── Render ─────────────────────────────────────────────────────
+// Emoji por defecto según grado
+const GRADE_EMOJI = { '2do': '🐣', '5to': '🎓' };
 
 function matPath(unit, mat) {
   const slug = `unit${unit.unit}_${unit.grade}`;
   return `generado/${unit.grade}/unit${unit.unit}/${slug}_${mat.id}.html`;
 }
 
-function renderUnits(grade) {
-  const container = document.getElementById(`units-${grade}`);
-  const gradeUnits = UNITS.filter(u => u.grade === grade);
+function renderUnits(grade, units) {
+  const container  = document.getElementById(`units-${grade}`);
+  const gradeUnits = units.filter(u => u.grade === grade);
 
   if (gradeUnits.length === 0) {
     container.innerHTML = `
@@ -160,8 +146,8 @@ function renderUnits(grade) {
 
   container.innerHTML = gradeUnits.map((unit, idx) => `
     <div class="unit-card">
-      <div class="unit-header" onclick="toggle('panel-${grade}-${idx}', this)">
-        <span class="unit-icon">${unit.emoji}</span>
+      <div class="unit-header" onclick="toggle('panel-${grade}-${idx}')">
+        <span class="unit-icon">${unit.emoji || GRADE_EMOJI[grade] || '📚'}</span>
         <div class="unit-info">
           <div class="unit-name">Unit ${unit.unit} — ${unit.name}</div>
           <div class="unit-meta">${grade} Grado · ${MATERIALS.length} activities</div>
@@ -179,11 +165,10 @@ function renderUnits(grade) {
     </div>`).join('');
 }
 
-function toggle(panelId, header) {
+function toggle(panelId) {
   const panel = document.getElementById(panelId);
-  const chevId = panelId.replace('panel-', 'chev-');
-  const chev   = document.getElementById(chevId);
-  const open   = panel.style.display !== 'none';
+  const chev  = document.getElementById(panelId.replace('panel-', 'chev-'));
+  const open  = panel.style.display !== 'none';
   panel.style.display = open ? 'none' : 'grid';
   chev.classList.toggle('open', !open);
 }
@@ -195,10 +180,16 @@ function setKid(grade, btn) {
   document.getElementById('content-5to').style.display = grade === '5to' ? '' : 'none';
 }
 
-// ─── Init ────────────────────────────────────────────────────────
+// ─── Init: cargar units.json generado por el servidor ────────────
 document.getElementById('year').textContent = new Date().getFullYear();
-renderUnits('2do');
-renderUnits('5to');
+
+fetch('generado/units.json?v=' + Date.now())
+  .then(r => r.ok ? r.json() : [])
+  .catch(() => [])
+  .then(units => {
+    renderUnits('2do', units);
+    renderUnits('5to', units);
+  });
 </script>
 </body>
 </html>
