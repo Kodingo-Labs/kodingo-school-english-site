@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashcards — Unit 4 My Best City Ever</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+  }
+
+  header {
+    text-align: center;
+    color: white;
+    margin-bottom: 24px;
+  }
+  header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.3); }
+  header p  { font-size: 1.1rem; opacity: .9; margin-top: 4px; }
+
+  /* category tabs */
+  .tabs {
+    display: flex; justify-content: center; gap: 12px;
+    margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .tab {
+    background: rgba(255,255,255,.25); color: white;
+    border: 2px solid rgba(255,255,255,.5); border-radius: 50px;
+    padding: 8px 22px; font-family: inherit; font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: all .2s;
+  }
+  .tab.active, .tab:hover {
+    background: white; color: #764ba2;
+  }
+
+  /* progress */
+  .progress-bar {
+    max-width: 540px; margin: 0 auto 24px;
+    background: rgba(255,255,255,.3); border-radius: 50px; height: 10px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: #ffd700;
+    border-radius: 50px; transition: width .4s ease;
+  }
+  .progress-label {
+    text-align: center; color: white; font-size: .95rem; font-weight: 700; margin-bottom: 8px;
+  }
+
+  /* card area */
+  .card-wrap {
+    perspective: 1200px;
+    width: min(420px, 100%);
+    margin: 0 auto;
+    height: 300px;
+  }
+  .card {
+    width: 100%; height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.4,0,.2,1);
+    cursor: pointer;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+
+  .face {
+    position: absolute; inset: 0;
+    border-radius: 24px;
+    backface-visibility: hidden;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 28px 24px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.25);
+  }
+  .face.front { background: white; }
+  .face.back  { background: white; transform: rotateY(180deg); }
+
+  .face.front .emoji { font-size: 4.5rem; line-height: 1; margin-bottom: 12px; }
+  .face.front .word  { font-size: 2.2rem; font-weight: 900; color: #333; text-align: center; }
+  .face.front .hint  { margin-top: 10px; font-size: .85rem; color: #aaa; font-weight: 600; }
+
+  .face.back .translation {
+    font-size: 2rem; font-weight: 900; color: #764ba2; text-align: center; margin-bottom: 10px;
+  }
+  .face.back .example {
+    font-size: 1.1rem; color: #555; text-align: center; line-height: 1.5;
+    background: #f5f0ff; border-radius: 12px; padding: 10px 16px;
+  }
+  .face.back .back-emoji { font-size: 2.5rem; margin-bottom: 10px; }
+
+  /* nav buttons */
+  .nav {
+    display: flex; justify-content: center; align-items: center;
+    gap: 16px; margin-top: 24px; flex-wrap: wrap;
+  }
+  .nav button {
+    background: rgba(255,255,255,.25); color: white;
+    border: 2px solid rgba(255,255,255,.5); border-radius: 50px;
+    padding: 10px 28px; font-family: inherit; font-size: 1rem; font-weight: 700;
+    cursor: pointer; transition: all .2s; min-width: 110px;
+  }
+  .nav button:hover { background: white; color: #764ba2; }
+  .nav .counter { color: white; font-size: 1.1rem; font-weight: 800; min-width: 70px; text-align: center; }
+
+  /* card colors by category */
+  .face.front[data-cat="place"]  .emoji-bg { background: linear-gradient(135deg, #f093fb, #f5576c); }
+  .face.front[data-cat="occ"]    .emoji-bg { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+
+  .emoji-bg {
+    border-radius: 50%;
+    width: 90px; height: 90px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3.5rem;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.15);
+  }
+
+  /* color accent bar on cards */
+  .face.front::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 6px;
+    border-radius: 0 0 24px 24px;
+  }
+  .face.front[data-cat="place"]::after  { background: linear-gradient(90deg,#f093fb,#f5576c); }
+  .face.front[data-cat="occ"]::after    { background: linear-gradient(90deg,#4facfe,#00f2fe); }
+
+  .badge {
+    position: absolute; top: 14px; right: 14px;
+    font-size: .75rem; font-weight: 800; padding: 3px 10px; border-radius: 50px;
+    text-transform: uppercase; letter-spacing: .5px;
+  }
+  .badge-place { background: #fde0f5; color: #c0166c; }
+  .badge-occ   { background: #d0f0ff; color: #0077aa; }
+
+  /* shuffle & restart */
+  .tools {
+    text-align: center; margin-top: 18px;
+  }
+  .tools button {
+    background: rgba(255,255,255,.2); color: white;
+    border: 1.5px solid rgba(255,255,255,.4); border-radius: 50px;
+    padding: 7px 20px; font-family: inherit; font-size: .9rem; font-weight: 700;
+    cursor: pointer; margin: 4px; transition: all .2s;
+  }
+  .tools button:hover { background: rgba(255,255,255,.4); }
+</style>
+</head>
+<body>
+<header>
+  <h1>🏙️ My Best City Ever</h1>
+  <p>Unit 4 · 2do Grado · Flashcards</p>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="setCategory('all')">⭐ All</button>
+  <button class="tab" onclick="setCategory('place')">🏙️ Places</button>
+  <button class="tab" onclick="setCategory('occ')">👩‍⚕️ Occupations</button>
+</div>
+
+<div class="progress-label" id="progress-label">Card 1 of 27</div>
+<div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:3.7%"></div></div>
+
+<div class="card-wrap">
+  <div class="card" id="card" onclick="flip()">
+    <div class="face front" id="face-front" data-cat="">
+      <span class="badge" id="badge"></span>
+      <div class="emoji-bg" id="emoji-bg"><span id="front-emoji"></span></div>
+      <div class="word" id="front-word"></div>
+      <div class="hint">👆 Tap to see the answer</div>
+    </div>
+    <div class="face back" id="face-back">
+      <div class="back-emoji" id="back-emoji"></div>
+      <div class="translation" id="back-translation"></div>
+      <div class="example" id="back-example"></div>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <button onclick="prev()">◀ Back</button>
+  <span class="counter" id="counter">1 / 27</span>
+  <button onclick="next()">Next ▶</button>
+</div>
+
+<div class="tools">
+  <button onclick="shuffle()">🔀 Shuffle</button>
+  <button onclick="restart()">🔄 Restart</button>
+</div>
+
+<script>
+const ALL_CARDS = [
+  // Places
+  { cat:'place', emoji:'🏦', word:'Bank',           es:'Banco',                   ex:'I go to the bank with my mom.' },
+  { cat:'place', emoji:'📚', word:'Bookstore',      es:'Librería',                ex:'I buy a book at the bookstore.' },
+  { cat:'place', emoji:'🚌', word:'Bus Stop',        es:'Parada de autobús',       ex:'I wait at the bus stop.' },
+  { cat:'place', emoji:'💻', word:'Computer Store',  es:'Tienda de computadoras',  ex:'I want a computer from the computer store.' },
+  { cat:'place', emoji:'⛽', word:'Gas Station',     es:'Grifo',                   ex:'Dad puts gas at the gas station.' },
+  { cat:'place', emoji:'🏥', word:'Hospital',        es:'Hospital',                ex:'The doctor works at the hospital.' },
+  { cat:'place', emoji:'🎬', word:'Movie Theater',   es:'Cine',                    ex:'I see a movie at the movie theater.' },
+  { cat:'place', emoji:'🎵', word:'Music Store',     es:'Tienda de música',        ex:'I buy a guitar at the music store.' },
+  { cat:'place', emoji:'🌳', word:'Park',            es:'Parque',                  ex:'I like to play at the park.' },
+  { cat:'place', emoji:'🐾', word:'Pet Shop',        es:'Tienda de mascotas',      ex:'I want a dog from the pet shop.' },
+  { cat:'place', emoji:'📮', word:'Post Office',     es:'Oficina de correos',      ex:'Mom mails a letter at the post office.' },
+  { cat:'place', emoji:'🍕', word:'Restaurant',      es:'Restaurante',             ex:'We eat pizza at the restaurant.' },
+  { cat:'place', emoji:'🏫', word:'School',          es:'Escuela',                 ex:'I learn English at school.' },
+  { cat:'place', emoji:'🛍️', word:'Shopping Mall',  es:'Centro comercial',        ex:'We shop at the shopping mall.' },
+  { cat:'place', emoji:'🛒', word:'Supermarket',     es:'Supermercado',            ex:'Mom buys fruits at the supermarket.' },
+  { cat:'place', emoji:'🚂', word:'Train Station',   es:'Estación de tren',        ex:'The train is at the train station.' },
+  // Occupations
+  { cat:'occ',   emoji:'🎭', word:'Actor',    es:'Actor / Actriz',     ex:'An actor performs in movies.' },
+  { cat:'occ',   emoji:'🎨', word:'Artist',   es:'Artista',            ex:'An artist draws and paints.' },
+  { cat:'occ',   emoji:'🏃', word:'Athlete',  es:'Atleta',             ex:'An athlete runs very fast.' },
+  { cat:'occ',   emoji:'👨‍🍳',word:'Chef',     es:'Chef / Cocinero',   ex:'A chef cooks delicious food.' },
+  { cat:'occ',   emoji:'💃', word:'Dancer',   es:'Bailarín / Bailarina',ex:'A dancer moves beautifully.' },
+  { cat:'occ',   emoji:'👨‍⚕️',word:'Doctor',   es:'Doctor / Doctora',  ex:'A doctor helps sick people.' },
+  { cat:'occ',   emoji:'✈️', word:'Pilot',    es:'Piloto',             ex:'A pilot flies big planes.' },
+  { cat:'occ',   emoji:'🎤', word:'Singer',   es:'Cantante',           ex:'A singer sings wonderful songs.' },
+  { cat:'occ',   emoji:'👩‍🏫',word:'Teacher',  es:'Profesor / Profesora',ex:'A teacher works at school.' },
+  { cat:'occ',   emoji:'🐶', word:'Vet',      es:'Veterinario/a',      ex:'A vet helps sick animals.' },
+  { cat:'occ',   emoji:'✍️', word:'Writer',   es:'Escritor / Escritora',ex:'A writer writes great books.' },
+];
+
+let deck = [...ALL_CARDS];
+let current = 0;
+
+function setCategory(cat) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  deck = cat === 'all' ? [...ALL_CARDS] : ALL_CARDS.filter(c => c.cat === cat);
+  current = 0;
+  render();
+}
+
+function render() {
+  const c = deck[current];
+  // front
+  const front = document.getElementById('face-front');
+  front.dataset.cat = c.cat;
+  document.getElementById('front-emoji').textContent = c.emoji;
+  document.getElementById('front-word').textContent  = c.word;
+  const badge = document.getElementById('badge');
+  badge.textContent = c.cat === 'place' ? '📍 Place' : '👤 Occupation';
+  badge.className   = 'badge ' + (c.cat === 'place' ? 'badge-place' : 'badge-occ');
+  // back
+  document.getElementById('back-emoji').textContent       = c.emoji;
+  document.getElementById('back-translation').textContent = c.es;
+  document.getElementById('back-example').textContent     = '"' + c.ex + '"';
+  // progress
+  const pct = ((current + 1) / deck.length * 100).toFixed(1);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = `Card ${current+1} of ${deck.length}`;
+  document.getElementById('counter').textContent        = `${current+1} / ${deck.length}`;
+  // unflip
+  document.getElementById('card').classList.remove('flipped');
+}
+
+function flip() { document.getElementById('card').classList.toggle('flipped'); }
+
+function next() {
+  if (current < deck.length - 1) { current++; render(); }
+  else {
+    // completed
+    document.getElementById('progress-label').textContent = '🎉 All done! Great job!';
+  }
+}
+function prev() { if (current > 0) { current--; render(); } }
+
+function shuffle() {
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  current = 0; render();
+}
+
+function restart() { current = 0; render(); }
+
+render();
+</script>
+</body>
+</html>

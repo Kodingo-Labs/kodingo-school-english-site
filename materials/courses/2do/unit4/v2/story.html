@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Story — Unit 4 My Best City Ever</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --story-bg: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    --quiz-bg:  linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+  }
+
+  body { font-family: 'Nunito', sans-serif; }
+
+  /* ═══════════ SECTION 1 — STORY ═══════════ */
+  #story-section {
+    min-height: 100vh;
+    background: var(--story-bg);
+    padding: 24px 20px 48px;
+  }
+
+  .story-header { text-align: center; color: white; margin-bottom: 28px; }
+  .story-header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  .story-header p  { font-size: 1rem; opacity: .9; margin-top: 4px; }
+
+  /* voice controls */
+  .voice-bar {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 10px; margin-bottom: 22px;
+  }
+  .btn-read {
+    background: white; color: #059669;
+    border: none; border-radius: 50px; padding: 10px 24px;
+    font-family: inherit; font-size: 1rem; font-weight: 800;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.2); transition: transform .2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-read:hover { transform: scale(1.04); }
+  .btn-read.speaking { background: #d1fae5; }
+
+  #voice-select {
+    background: rgba(255,255,255,.9); border: none; border-radius: 50px;
+    padding: 8px 16px; font-family: inherit; font-size: .9rem; font-weight: 700;
+    color: #333; cursor: pointer; max-width: 220px;
+  }
+
+  /* story card */
+  .story-card {
+    background: white; border-radius: 24px;
+    padding: 28px 24px; max-width: 680px; margin: 0 auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,.15);
+  }
+  .story-card .title {
+    font-size: 1.5rem; font-weight: 900; color: #065f46;
+    text-align: center; margin-bottom: 20px;
+  }
+
+  .sentence {
+    font-size: 1.2rem; line-height: 1.8; color: #333;
+    margin-bottom: 12px; padding: 10px 14px; border-radius: 12px;
+    cursor: pointer; transition: background .2s;
+    position: relative;
+  }
+  .sentence:hover { background: #f0fdf4; }
+  .sentence.speaking-line { background: #d1fae5; }
+
+  mark {
+    background: #fef08a; border-radius: 4px; padding: 0 3px;
+    font-weight: 800; color: #333;
+  }
+
+  /* scroll button */
+  .btn-quiz {
+    display: block; margin: 28px auto 0;
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    color: #333; border: none; border-radius: 50px;
+    padding: 14px 36px; font-family: inherit; font-size: 1.1rem; font-weight: 900;
+    cursor: pointer; box-shadow: 0 6px 20px rgba(0,0,0,.2); transition: transform .2s;
+  }
+  .btn-quiz:hover { transform: scale(1.05); }
+
+  /* ═══════════ SECTION 2 — QUIZ ═══════════ */
+  #quiz-section {
+    min-height: 100vh;
+    background: var(--quiz-bg);
+    padding: 32px 20px 60px;
+  }
+
+  .quiz-header { text-align: center; color: white; margin-bottom: 28px; }
+  .quiz-header h1 { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.25); }
+
+  /* progress */
+  .q-progress-bar {
+    max-width: 540px; margin: 0 auto 8px;
+    background: rgba(255,255,255,.35); border-radius: 50px; height: 12px; overflow: hidden;
+  }
+  .q-progress-fill { height: 100%; background: white; border-radius: 50px; transition: width .4s ease; }
+  .q-progress-label {
+    text-align: center; color: white; font-size: .95rem; font-weight: 800; margin-bottom: 20px;
+  }
+
+  /* question card */
+  .q-card {
+    background: white; border-radius: 24px; padding: 28px 24px;
+    max-width: 580px; margin: 0 auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,.15);
+  }
+  .q-card .question { font-size: 1.3rem; font-weight: 800; color: #333; margin-bottom: 20px; line-height: 1.4; }
+
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .option {
+    background: #f9fafb; border: 2px solid #e5e7eb;
+    border-radius: 16px; padding: 14px 20px;
+    font-family: inherit; font-size: 1.05rem; font-weight: 700; color: #333;
+    cursor: pointer; text-align: left; transition: all .2s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .option:hover { background: #fff7ed; border-color: #f7971e; }
+  .option.correct { background: #d1fae5; border-color: #059669; color: #065f46; pointer-events: none; }
+  .option.wrong   { background: #fee2e2; border-color: #dc2626; color: #7f1d1d; animation: shake .3s; pointer-events: none; }
+  .option.disabled { pointer-events: none; opacity: .6; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%      { transform: translateX(-6px); }
+    75%      { transform: translateX(6px); }
+  }
+
+  .feedback-msg {
+    text-align: center; font-size: 1.1rem; font-weight: 800;
+    margin-top: 16px; min-height: 28px;
+  }
+  .feedback-msg.ok  { color: #059669; }
+  .feedback-msg.err { color: #dc2626; }
+
+  .star-burst {
+    text-align: center; font-size: 2rem;
+    animation: pop .4s cubic-bezier(.34,1.56,.64,1);
+    margin-top: 6px;
+  }
+  @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+  .btn-next {
+    display: none; margin: 20px auto 0;
+    background: linear-gradient(135deg, #f7971e, #ffd200);
+    color: #333; border: none; border-radius: 50px;
+    padding: 12px 32px; font-family: inherit; font-size: 1rem; font-weight: 900;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.2); transition: transform .2s;
+  }
+  .btn-next:hover { transform: scale(1.04); }
+
+  /* final screen */
+  #final-screen {
+    display: none;
+    background: white; border-radius: 28px; padding: 40px 28px;
+    max-width: 460px; margin: 0 auto; text-align: center;
+    box-shadow: 0 16px 50px rgba(0,0,0,.2);
+    animation: popIn .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  #final-screen .result-emoji { font-size: 4.5rem; margin-bottom: 14px; }
+  #final-screen h2 { font-size: 1.8rem; font-weight: 900; color: #d97706; margin-bottom: 8px; }
+  #final-screen p  { font-size: 1rem; color: #555; margin-bottom: 24px; line-height: 1.5; }
+  #final-screen .score-big { font-size: 3rem; font-weight: 900; color: #f59e0b; margin-bottom: 10px; }
+  .btn-retry {
+    background: linear-gradient(135deg, #43e97b, #38f9d7);
+    color: #333; border: none; border-radius: 50px;
+    padding: 12px 30px; margin: 6px; font-family: inherit; font-size: 1rem; font-weight: 800;
+    cursor: pointer; transition: transform .2s;
+  }
+  .btn-retry:hover { transform: scale(1.04); }
+  .btn-readagain {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white; border: none; border-radius: 50px;
+    padding: 12px 30px; margin: 6px; font-family: inherit; font-size: 1rem; font-weight: 800;
+    cursor: pointer; transition: transform .2s;
+  }
+  .btn-readagain:hover { transform: scale(1.04); }
+</style>
+</head>
+<body>
+
+<!-- ════════════ SECTION 1: STORY ════════════ -->
+<section id="story-section">
+  <div class="story-header">
+    <h1>📖 My Best City Ever</h1>
+    <p>Unit 4 · 2do Grado · Read &amp; Listen</p>
+  </div>
+
+  <div class="voice-bar">
+    <button class="btn-read" id="btn-read-all" onclick="readAll()">🔊 Read Aloud</button>
+    <select id="voice-select"></select>
+  </div>
+
+  <div class="story-card">
+    <div class="title">🏙️ Lima — My Best City!</div>
+
+    <p class="sentence" id="s0" onclick="readLine(0)">
+      My name is <mark>Mateo</mark> and I live in <mark>Lima</mark>, my best city ever! 🌟
+    </p>
+    <p class="sentence" id="s1" onclick="readLine(1)">
+      In my city there is a beautiful <mark>park</mark>. I love to play there with my friends.
+    </p>
+    <p class="sentence" id="s2" onclick="readLine(2)">
+      My mom goes to the <mark>supermarket</mark> to buy fruits and vegetables for dinner.
+    </p>
+    <p class="sentence" id="s3" onclick="readLine(3)">
+      My dad works at the <mark>bank</mark>. He helps people save their money.
+    </p>
+    <p class="sentence" id="s4" onclick="readLine(4)">
+      On Fridays, our family goes to the <mark>restaurant</mark> to eat pizza. Yummy! 🍕
+    </p>
+    <p class="sentence" id="s5" onclick="readLine(5)">
+      My <mark>teacher</mark> works at my <mark>school</mark>. She is very kind and funny.
+    </p>
+    <p class="sentence" id="s6" onclick="readLine(6)">
+      I want to be a <mark>doctor</mark> when I grow up and help people at the <mark>hospital</mark>!
+    </p>
+
+    <button class="btn-quiz" onclick="scrollToQuiz()">Let's answer! 🧠 →</button>
+  </div>
+</section>
+
+<!-- ════════════ SECTION 2: QUIZ ════════════ -->
+<section id="quiz-section">
+  <div class="quiz-header">
+    <h1>🧠 Reading Challenge!</h1>
+  </div>
+
+  <div class="q-progress-label" id="q-progress-label">Question 1 of 5</div>
+  <div class="q-progress-bar"><div class="q-progress-fill" id="q-progress-fill" style="width:0%"></div></div>
+
+  <div class="q-card" id="q-card">
+    <div class="question" id="q-question"></div>
+    <div class="options" id="q-options"></div>
+    <div class="feedback-msg" id="q-feedback"></div>
+    <div id="star-area"></div>
+    <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next ▶</button>
+  </div>
+
+  <div id="final-screen">
+    <div class="result-emoji" id="result-emoji"></div>
+    <div class="score-big" id="score-big"></div>
+    <h2 id="result-title"></h2>
+    <p id="result-msg"></p>
+    <button class="btn-retry" onclick="restartQuiz()">Try Again 🔄</button>
+    <button class="btn-readagain" onclick="scrollToStory()">Read Again 📖</button>
+  </div>
+</section>
+
+<script>
+/* ─────────── VOICE ─────────── */
+const VOICE_PREF = [
+  'Google US English','Samantha (Enhanced)','Samantha','Alex',
+  'Karen (Enhanced)','Karen','Moira',
+];
+let chosenVoice = null;
+const synth = window.speechSynthesis;
+
+function buildVoiceList() {
+  const voices = synth.getVoices().filter(v => v.lang.startsWith('en'));
+  if (!voices.length) return;
+  const sel = document.getElementById('voice-select');
+  sel.innerHTML = '';
+  let auto = null;
+  for (const name of VOICE_PREF) { auto = voices.find(v => v.name === name); if (auto) break; }
+  if (!auto) auto = voices.find(v => v.lang === 'en-US') || voices[0];
+  chosenVoice = auto;
+  voices.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.name;
+    opt.textContent = v.name.replace(' (Enhanced)', ' ✨').replace(' (Compact)', '');
+    opt.selected = v.name === auto.name;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', () => { chosenVoice = voices.find(v => v.name === sel.value) || null; });
+}
+synth.addEventListener('voiceschanged', buildVoiceList);
+buildVoiceList();
+
+function speak(text, onEnd) {
+  synth.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.82; u.pitch = 1.0;
+  if (chosenVoice) u.voice = chosenVoice;
+  if (onEnd) u.onend = onEnd;
+  synth.speak(u);
+}
+
+const LINES = [
+  "My name is Mateo and I live in Lima, my best city ever!",
+  "In my city there is a beautiful park. I love to play there with my friends.",
+  "My mom goes to the supermarket to buy fruits and vegetables for dinner.",
+  "My dad works at the bank. He helps people save their money.",
+  "On Fridays, our family goes to the restaurant to eat pizza. Yummy!",
+  "My teacher works at my school. She is very kind and funny.",
+  "I want to be a doctor when I grow up and help people at the hospital!",
+];
+
+let readingAll = false;
+let currentLine = -1;
+
+function clearHighlight() {
+  document.querySelectorAll('.sentence').forEach(s => s.classList.remove('speaking-line'));
+}
+
+function readLine(idx) {
+  readingAll = false;
+  clearHighlight();
+  document.getElementById('s' + idx).classList.add('speaking-line');
+  currentLine = idx;
+  speak(LINES[idx], () => {
+    clearHighlight();
+  });
+}
+
+function readAll() {
+  readingAll = true;
+  currentLine = 0;
+  const btn = document.getElementById('btn-read-all');
+  btn.classList.add('speaking');
+  btn.textContent = '⏹ Stop';
+  btn.onclick = stopRead;
+  readNextLine();
+}
+
+function readNextLine() {
+  if (!readingAll || currentLine >= LINES.length) { stopRead(); return; }
+  clearHighlight();
+  document.getElementById('s' + currentLine).classList.add('speaking-line');
+  speak(LINES[currentLine], () => {
+    currentLine++;
+    if (readingAll) readNextLine();
+  });
+}
+
+function stopRead() {
+  readingAll = false;
+  synth.cancel();
+  clearHighlight();
+  const btn = document.getElementById('btn-read-all');
+  btn.classList.remove('speaking');
+  btn.textContent = '🔊 Read Aloud';
+  btn.onclick = readAll;
+}
+
+/* ─────────── QUIZ ─────────── */
+const QUESTIONS = [
+  {
+    q: "What is the name of Mateo's city?",
+    options: ['A 🗼 Paris', 'B 🏙️ Lima', 'C 🗽 New York'],
+    correct: 1,
+  },
+  {
+    q: "Where does Mateo's mom go to buy fruits?",
+    options: ['A 🌳 Park', 'B 🏦 Bank', 'C 🛒 Supermarket'],
+    correct: 2,
+  },
+  {
+    q: "What does Mateo's dad do at the bank?",
+    options: ['A 🍕 Eat pizza', 'B 💰 Help people save money', 'C 📚 Buy books'],
+    correct: 1,
+  },
+  {
+    q: "Where does Mateo's teacher work?",
+    options: ['A 🏥 Hospital', 'B 🛍️ Shopping Mall', 'C 🏫 School'],
+    correct: 2,
+  },
+  {
+    q: "What does Mateo want to be when he grows up?",
+    options: ['A ✈️ Pilot', 'B 👨‍⚕️ Doctor', 'C 👨‍🍳 Chef'],
+    correct: 1,
+  },
+];
+
+let qIndex = 0;
+let score  = 0;
+let answered = false;
+
+function renderQuestion() {
+  const q = QUESTIONS[qIndex];
+  document.getElementById('q-question').textContent = q.q;
+  document.getElementById('q-feedback').textContent = '';
+  document.getElementById('q-feedback').className   = 'feedback-msg';
+  document.getElementById('star-area').innerHTML    = '';
+  document.getElementById('btn-next').style.display = 'none';
+
+  const pct = (qIndex / QUESTIONS.length) * 100;
+  document.getElementById('q-progress-fill').style.width = pct + '%';
+  document.getElementById('q-progress-label').textContent = `Question ${qIndex+1} of ${QUESTIONS.length}`;
+
+  const opts = document.getElementById('q-options');
+  opts.innerHTML = '';
+  q.options.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = text;
+    btn.onclick = () => selectOption(i, btn, q.correct);
+    opts.appendChild(btn);
+  });
+  answered = false;
+}
+
+function selectOption(idx, btn, correct) {
+  if (answered) return;
+  answered = true;
+
+  const allOpts = document.querySelectorAll('.option');
+
+  if (idx === correct) {
+    btn.classList.add('correct');
+    allOpts.forEach((b,i) => { if (i !== idx) b.classList.add('disabled'); });
+    const fb = document.getElementById('q-feedback');
+    fb.textContent = '✅ Great job!'; fb.className = 'feedback-msg ok';
+    document.getElementById('star-area').innerHTML = '<div class="star-burst">⭐</div>';
+    score++;
+  } else {
+    btn.classList.add('wrong');
+    allOpts[correct].classList.add('correct');
+    allOpts.forEach((b,i) => { if (i !== idx && i !== correct) b.classList.add('disabled'); });
+    const fb = document.getElementById('q-feedback');
+    fb.textContent = '❌ Try again! The correct answer is highlighted.'; fb.className = 'feedback-msg err';
+  }
+
+  document.getElementById('btn-next').style.display = 'block';
+}
+
+function nextQuestion() {
+  qIndex++;
+  if (qIndex >= QUESTIONS.length) {
+    showFinal();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showFinal() {
+  document.getElementById('q-card').style.display    = 'none';
+  document.getElementById('q-progress-label').style.display = 'none';
+  document.querySelector('.q-progress-bar').style.display   = 'none';
+  const fs = document.getElementById('final-screen');
+  fs.style.display = 'block';
+
+  document.getElementById('score-big').textContent = score + ' / ' + QUESTIONS.length;
+
+  let emoji, title, msg;
+  if (score === QUESTIONS.length) {
+    emoji = '🌟'; title = 'Perfect! You\'re a Reading Star!';
+    msg = 'You answered all questions correctly! Amazing work! 🎉';
+  } else if (score >= 3) {
+    emoji = '👏'; title = 'Well done! Keep it up!';
+    msg = 'Great reading! A little more practice and you\'ll get them all! 💪';
+  } else {
+    emoji = '💪'; title = 'Good try! Read again and retry.';
+    msg = 'Read the story one more time and try again. You can do it! 📖';
+  }
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-msg').textContent   = msg;
+  document.getElementById('q-progress-fill').style.width = '100%';
+}
+
+function restartQuiz() {
+  qIndex = 0; score = 0; answered = false;
+  document.getElementById('q-card').style.display    = 'block';
+  document.getElementById('q-progress-label').style.display = 'block';
+  document.querySelector('.q-progress-bar').style.display   = 'block';
+  document.getElementById('final-screen').style.display = 'none';
+  renderQuestion();
+}
+
+function scrollToQuiz() {
+  document.getElementById('quiz-section').scrollIntoView({ behavior: 'smooth' });
+}
+function scrollToStory() {
+  document.getElementById('story-section').scrollIntoView({ behavior: 'smooth' });
+}
+
+renderQuestion();
+</script>
+</body>
+</html>

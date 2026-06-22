@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matching — Unit 4 My Best City Ever</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    padding: 20px 16px 40px;
+  }
+
+  header { text-align: center; color: white; margin-bottom: 28px; }
+  header h1 { font-size: clamp(1.5rem, 4vw, 2.2rem); font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.25); }
+  header p  { font-size: 1rem; opacity: .9; margin-top: 4px; }
+
+  .instructions {
+    text-align: center; color: white; font-size: 1rem; font-weight: 700;
+    margin-bottom: 20px; opacity: .9;
+  }
+
+  .score-bar {
+    display: flex; justify-content: center; gap: 24px;
+    margin-bottom: 24px;
+  }
+  .score-pill {
+    background: rgba(255,255,255,.25); color: white; border-radius: 50px;
+    padding: 6px 20px; font-weight: 800; font-size: 1rem;
+  }
+
+  /* board */
+  .board {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .column { display: flex; flex-direction: column; gap: 10px; }
+
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 14px 16px;
+    font-size: 1.1rem; font-weight: 800;
+    text-align: center;
+    cursor: pointer;
+    border: 3px solid transparent;
+    box-shadow: 0 4px 14px rgba(0,0,0,.15);
+    transition: transform .15s, box-shadow .15s, border-color .15s, background .2s;
+    user-select: none;
+    min-height: 58px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,.2); }
+  .card.selected { border-color: #7c3aed; background: #f5f0ff; }
+  .card.correct  { background: #d1fae5; border-color: #059669; color: #065f46; pointer-events: none; }
+  .card.wrong    { background: #fee2e2; border-color: #dc2626; animation: shake .3s; }
+  .card.disabled { opacity: .35; pointer-events: none; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%      { transform: translateX(-6px); }
+    75%      { transform: translateX(6px); }
+  }
+
+  /* emoji cards */
+  .emoji-card { font-size: 2.2rem; }
+
+  /* success overlay */
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.55); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .overlay.show { display: flex; }
+  .popup {
+    background: white; border-radius: 28px; padding: 40px 36px;
+    text-align: center; max-width: 360px; width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,.4);
+    animation: popIn .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .popup .big-emoji { font-size: 4rem; margin-bottom: 12px; }
+  .popup h2 { font-size: 1.8rem; font-weight: 900; color: #7c3aed; margin-bottom: 8px; }
+  .popup p  { font-size: 1rem; color: #555; margin-bottom: 24px; }
+  .popup button {
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: white; border: none; border-radius: 50px;
+    padding: 12px 32px; font-family: inherit; font-size: 1.1rem; font-weight: 800;
+    cursor: pointer; transition: transform .2s;
+  }
+  .popup button:hover { transform: scale(1.05); }
+
+  /* feedback toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: white; border-radius: 50px; padding: 10px 28px;
+    font-size: 1rem; font-weight: 800; box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    transition: opacity .3s; opacity: 0; pointer-events: none; z-index: 200;
+  }
+  .toast.show { opacity: 1; }
+
+  .round-btn {
+    display: block; margin: 24px auto 0;
+    background: white; color: #f5576c; border: none; border-radius: 50px;
+    padding: 12px 32px; font-family: inherit; font-size: 1rem; font-weight: 800;
+    cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.2); transition: transform .2s;
+  }
+  .round-btn:hover { transform: scale(1.04); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🔗 Word Match!</h1>
+  <p>Unit 4 · 2do Grado · Match each word to its emoji</p>
+</header>
+
+<p class="instructions">👆 Tap a word, then tap its matching emoji!</p>
+
+<div class="score-bar">
+  <div class="score-pill">✅ <span id="correct-count">0</span> / 10</div>
+  <div class="score-pill">⭐ <span id="tries-count">0</span> tries</div>
+</div>
+
+<div class="board">
+  <div class="column" id="words-col"></div>
+  <div class="column" id="emojis-col"></div>
+</div>
+
+<button class="round-btn" onclick="newRound()">🔀 New Round</button>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="overlay">
+  <div class="popup">
+    <div class="big-emoji">🎉</div>
+    <h2>Amazing!</h2>
+    <p>You matched all 10 pairs!<br>You're a city expert! 🏙️</p>
+    <button onclick="newRound()">Play Again 🔄</button>
+  </div>
+</div>
+
+<script>
+const PAIRS = [
+  { word:'Bank',          emoji:'🏦' },
+  { word:'Park',          emoji:'🌳' },
+  { word:'Hospital',      emoji:'🏥' },
+  { word:'Restaurant',    emoji:'🍕' },
+  { word:'School',        emoji:'🏫' },
+  { word:'Movie Theater', emoji:'🎬' },
+  { word:'Supermarket',   emoji:'🛒' },
+  { word:'Pet Shop',      emoji:'🐾' },
+  { word:'Doctor',        emoji:'👨‍⚕️' },
+  { word:'Teacher',       emoji:'👩‍🏫' },
+];
+
+let selected = null;  // { type:'word'|'emoji', id, el }
+let correctCount = 0;
+let tries = 0;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i > 0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function newRound() {
+  correctCount = 0; tries = 0;
+  selected = null;
+  updateScore();
+  document.getElementById('overlay').classList.remove('show');
+
+  const wordsCol  = document.getElementById('words-col');
+  const emojisCol = document.getElementById('emojis-col');
+  wordsCol.innerHTML = ''; emojisCol.innerHTML = '';
+
+  const shuffledWords  = shuffle(PAIRS);
+  const shuffledEmojis = shuffle(PAIRS);
+
+  shuffledWords.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'card';
+    el.textContent = p.word;
+    el.dataset.id = p.word;
+    el.dataset.type = 'word';
+    el.addEventListener('click', () => onSelect('word', p.word, el));
+    wordsCol.appendChild(el);
+  });
+
+  shuffledEmojis.forEach(p => {
+    const el = document.createElement('div');
+    el.className = 'card emoji-card';
+    el.textContent = p.emoji;
+    el.dataset.id = p.word;
+    el.dataset.type = 'emoji';
+    el.addEventListener('click', () => onSelect('emoji', p.word, el));
+    emojisCol.appendChild(el);
+  });
+}
+
+function onSelect(type, id, el) {
+  if (el.classList.contains('correct') || el.classList.contains('disabled')) return;
+
+  if (!selected) {
+    // first selection
+    if (selected?.el) selected.el.classList.remove('selected');
+    selected = { type, id, el };
+    el.classList.add('selected');
+    return;
+  }
+
+  if (selected.el === el) {
+    // deselect
+    el.classList.remove('selected');
+    selected = null;
+    return;
+  }
+
+  if (selected.type === type) {
+    // same column → switch selection
+    selected.el.classList.remove('selected');
+    selected = { type, id, el };
+    el.classList.add('selected');
+    return;
+  }
+
+  // different columns → check match
+  tries++;
+  updateScore();
+
+  if (selected.id === id) {
+    // CORRECT
+    selected.el.classList.remove('selected');
+    selected.el.classList.add('correct');
+    el.classList.add('correct');
+    selected = null;
+    correctCount++;
+    updateScore();
+    showToast('✅ Great match!', '#d1fae5');
+    if (correctCount === PAIRS.length) {
+      setTimeout(() => document.getElementById('overlay').classList.add('show'), 600);
+    }
+  } else {
+    // WRONG
+    const wrongA = selected.el;
+    const wrongB = el;
+    wrongA.classList.remove('selected');
+    wrongA.classList.add('wrong');
+    wrongB.classList.add('wrong');
+    showToast('❌ Try again!', '#fee2e2');
+    setTimeout(() => {
+      wrongA.classList.remove('wrong');
+      wrongB.classList.remove('wrong');
+    }, 600);
+    selected = null;
+  }
+}
+
+function updateScore() {
+  document.getElementById('correct-count').textContent = correctCount;
+  document.getElementById('tries-count').textContent   = tries;
+}
+
+let toastTimer;
+function showToast(msg, bg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = bg || 'white';
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1200);
+}
+
+newRound();
+</script>
+</body>
+</html>

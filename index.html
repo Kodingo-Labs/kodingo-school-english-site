@@ -148,9 +148,8 @@ let currentType  = 'courses';
 let currentGrade = '2do';
 
 function matPath(unit, mat) {
-  const slug = `unit${unit.unit}_${unit.grade}`;
-  const ver  = unit.activeVersion ? `${unit.activeVersion}/` : '';
-  return `generado/${unit.type}s/${unit.grade}/unit${unit.unit}/${ver}${slug}_${mat.id}.html`;
+  const ver = unit.activeVersion ? `${unit.activeVersion}/` : '';
+  return `materials/${unit.type}/${unit.grade}/unit${unit.unit}/${ver}${mat.id}.html`;
 }
 
 function renderUnits() {
@@ -212,7 +211,7 @@ function setGrade(grade, btn) {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 
-fetch('generado/units.json?v=' + Date.now())
+fetch('materials/units.json?v=' + Date.now())
   .then(r => r.ok ? r.json() : [])
   .catch(() => [])
   .then(units => {
