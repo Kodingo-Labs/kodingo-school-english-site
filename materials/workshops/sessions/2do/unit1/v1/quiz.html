@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Studio 3D — Mateo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f1f5f9;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 22px 22px;
+      min-height: 100vh;
+      padding: 28px 16px 64px;
+      color: #1e293b;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .header .icon { font-size: 3rem; display: block; margin-bottom: 8px; }
+    .header h1 { font-size: 1.8rem; font-weight: 900; }
+    .header .sub { color: #64748b; font-size: 0.88rem; margin-top: 5px; font-weight: 600; }
+
+    .card {
+      background: white; border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      padding: 28px 28px 24px;
+      width: 100%; max-width: 580px;
+    }
+
+    /* Progress bar */
+    .prog-bar-wrap { margin-bottom: 22px; }
+    .prog-labels {
+      display: flex; justify-content: space-between;
+      font-size: 0.78rem; font-weight: 800; color: #94a3b8;
+      margin-bottom: 8px;
+    }
+    .prog-labels .current { color: #4f46e5; }
+    .prog-bg { height: 10px; background: #e2e8f0; border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, #4f46e5, #7c3aed); border-radius: 99px; transition: width .4s ease; }
+
+    /* Question */
+    .question-num {
+      font-size: 0.75rem; font-weight: 900; text-transform: uppercase;
+      letter-spacing: 1px; color: #94a3b8; margin-bottom: 10px;
+    }
+    .question-text {
+      font-size: 1.15rem; font-weight: 900; color: #1e293b;
+      line-height: 1.45; margin-bottom: 24px;
+    }
+
+    /* Options */
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .opt-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; border-radius: 14px;
+      border: 2.5px solid #e2e8f0; background: white;
+      font-family: inherit; font-size: 0.95rem; font-weight: 800;
+      cursor: pointer; text-align: left; color: #1e293b;
+      transition: all .15s;
+    }
+    .opt-btn:not(:disabled):hover { border-color: #a5b4fc; background: #eef2ff; }
+    .opt-btn:disabled { cursor: default; }
+
+    .opt-letter {
+      width: 32px; height: 32px; flex-shrink: 0;
+      border-radius: 50%; background: #f1f5f9;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 900; color: #64748b;
+    }
+
+    .opt-btn.correct { border-color: #22c55e; background: #f0fdf4; }
+    .opt-btn.correct .opt-letter { background: #22c55e; color: white; }
+    .opt-btn.wrong   { border-color: #ef4444; background: #fef2f2; }
+    .opt-btn.wrong .opt-letter   { background: #ef4444; color: white; }
+
+    /* Feedback */
+    .feedback {
+      display: none; margin-top: 18px;
+      padding: 13px 16px; border-radius: 12px;
+      font-size: 0.88rem; font-weight: 800; line-height: 1.5;
+    }
+    .feedback.show { display: block; }
+    .feedback.ok  { background: #f0fdf4; color: #15803d; border: 2px solid #bbf7d0; }
+    .feedback.bad { background: #fef2f2; color: #dc2626; border: 2px solid #fecaca; }
+
+    .next-btn {
+      display: none; margin-top: 20px; width: 100%;
+      padding: 14px; background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white; border: none; border-radius: 14px;
+      font-family: inherit; font-size: 1rem; font-weight: 900;
+      cursor: pointer; box-shadow: 0 4px 16px rgba(79,70,229,.3);
+      transition: transform .1s;
+    }
+    .next-btn.show { display: block; }
+    .next-btn:active { transform: scale(.98); }
+
+    /* Results screen */
+    .results {
+      display: none; width: 100%; max-width: 580px;
+      background: white; border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      padding: 40px 28px; text-align: center;
+    }
+    .results.show { display: block; }
+    .res-trophy { font-size: 5rem; display: block; margin-bottom: 12px; }
+    .res-score { font-size: 3rem; font-weight: 900; color: #4f46e5; margin-bottom: 6px; }
+    .res-label { font-size: 0.95rem; color: #64748b; font-weight: 700; margin-bottom: 20px; }
+    .res-stars { font-size: 2.5rem; letter-spacing: 4px; margin-bottom: 16px; display: block; }
+    .res-msg { font-size: 1.05rem; font-weight: 800; color: #1e293b; line-height: 1.6; margin-bottom: 24px; }
+    .retry-btn {
+      padding: 13px 32px; background: #f1f5f9;
+      color: #4f46e5; border: 2.5px solid #c7d2fe; border-radius: 99px;
+      font-family: inherit; font-size: 0.95rem; font-weight: 900;
+      cursor: pointer; transition: all .15s;
+    }
+    .retry-btn:hover { background: #eef2ff; border-color: #a5b4fc; }
+
+    footer { margin-top: 40px; color: #94a3b8; font-size: 0.75rem; font-weight: 700; text-align: center; }
+
+    @media (max-width: 480px) {
+      .card, .results { padding: 24px 18px 20px; }
+      .question-text { font-size: 1rem; }
+      .opt-btn { font-size: 0.88rem; padding: 12px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <span class="icon">🧠</span>
+  <h1>Quiz Studio 3D</h1>
+  <p class="sub">¿Cuánto aprendiste, Mateo? ¡Vamos a descubrirlo!</p>
+</header>
+
+<div class="card" id="quiz-card">
+  <div class="prog-bar-wrap">
+    <div class="prog-labels">
+      <span class="current" id="prog-text">Pregunta 1 de 8</span>
+      <span id="score-label">0 correctas</span>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="question-num" id="q-num">Pregunta 1</div>
+  <div class="question-text" id="q-text"></div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Siguiente pregunta →</button>
+</div>
+
+<div class="results" id="results">
+  <span class="res-trophy" id="res-icon">🏆</span>
+  <div class="res-score" id="res-score">8/8</div>
+  <div class="res-label">respuestas correctas</div>
+  <span class="res-stars" id="res-stars">⭐⭐⭐⭐⭐</span>
+  <div class="res-msg" id="res-msg"></div>
+  <button class="retry-btn" onclick="restart()">🔁 Intentar de nuevo</button>
+</div>
+
+<footer>Studio 3D — Manual de Mateo · Kodingo School</footer>
+
+<script>
+const QUESTIONS = [
+  {
+    q: '¿De qué material especial está hecho el filamento PLA?',
+    opts: ['Metal fundido', 'Plantas de maíz 🌽', 'Arena y cemento'],
+    correct: 1,
+    ok:  '¡Correcto! El PLA viene de plantas, por eso es ecológico.',
+    bad: 'No exactamente. El PLA está hecho de plantas de maíz, ¡es ecológico!'
+  },
+  {
+    q: '¿Cómo se llama el programa que usamos para DISEÑAR objetos en 3D?',
+    opts: ['Bambu Studio', 'Tinkercad ✏️', 'Minecraft'],
+    correct: 1,
+    ok:  '¡Sí! Tinkercad es donde diseñamos. Bambu Studio es para preparar la impresión.',
+    bad: 'Ese no. Usamos Tinkercad para diseñar. Bambu Studio es para preparar la impresión.'
+  },
+  {
+    q: '¿Qué es el nozzle de la impresora?',
+    opts: ['La pantalla de control', 'La punta por donde sale el plástico caliente 🔥', 'El carrete del filamento'],
+    correct: 1,
+    ok:  '¡Exacto! El nozzle sale muy caliente, ¡por eso no lo tocamos!',
+    bad: 'No es eso. El nozzle es la punta metálica por donde sale el plástico caliente.'
+  },
+  {
+    q: '¿Para qué sirve "agrupar" formas en Tinkercad?',
+    opts: ['Para poner colores al diseño', 'Para juntar varias formas en una sola 🔗', 'Para enviar el diseño a la impresora'],
+    correct: 1,
+    ok:  '¡Muy bien! Al agrupar, las formas se comportan como un solo objeto.',
+    bad: 'No es eso. Agrupar junta varias formas para que se comporten como una sola.'
+  },
+  {
+    q: 'Si quiero un objeto con mucho detalle, ¿qué altura de capa debo elegir?',
+    opts: ['1.0mm (muy gruesa)', '0.3mm (normal)', '0.1mm (muy fina) 🔍'],
+    correct: 2,
+    ok:  '¡Correcto! Capas más finas = más detalle, pero la impresión tarda más.',
+    bad: 'No. Capas más FINAS dan más detalle. 0.1mm es la más fina de las opciones.'
+  },
+  {
+    q: '¿Qué hace la "forma agujero" en Tinkercad?',
+    opts: ['Dibuja un círculo decorativo', 'Recorta el material al agruparla con otra forma 🕳️', 'Pinta la forma de gris'],
+    correct: 1,
+    ok:  '¡Genial! Es la varita mágica: al agruparla con otra forma, hace un hueco.',
+    bad: 'No es eso. La forma agujero, al agrupar, "come" la parte de la otra forma y hace un hueco.'
+  },
+  {
+    q: '¿Cuál debe ser el PRIMER paso antes de diseñar en Tinkercad?',
+    opts: ['Exportar el archivo STL', 'Configurar Bambu Studio', 'Hacer un boceto en papel ✏️'],
+    correct: 2,
+    ok:  '¡Exacto! Siempre dibujamos la idea primero. Es más fácil borrar en papel.',
+    bad: 'No es eso. Primero dibujamos el boceto en papel para organizar las ideas.'
+  },
+  {
+    q: '¿Qué es el relleno (infill) de un objeto impreso?',
+    opts: ['El color del filamento', 'La estructura del interior del objeto 🕸️', 'La temperatura de impresión'],
+    correct: 1,
+    ok:  '¡Muy bien! El infill es como el esqueleto interno que hace el objeto resistente.',
+    bad: 'No exactamente. El infill es la estructura interna del objeto. Más porcentaje = más sólido.'
+  }
+];
+
+const RES = [
+  { stars: '⭐', icon: '💪', msg: 'Buena esa, Mateo. ¡Seguí practicando y la próxima te va mejor!' },
+  { stars: '⭐⭐', icon: '😊', msg: '¡Vas bien! Repasá la guía y volvé a intentarlo.' },
+  { stars: '⭐⭐⭐', icon: '😎', msg: '¡Buen trabajo! Ya sabés bastante de Studio 3D.' },
+  { stars: '⭐⭐⭐⭐', icon: '🎉', msg: '¡Excelente, Mateo! Casi perfecto. ¡Sos un pro del Studio 3D!' },
+  { stars: '⭐⭐⭐⭐⭐', icon: '🏆', msg: '¡PERFECTO! ¡8 de 8! ¡Sos un verdadero campeón del Studio 3D, Mateo!' }
+];
+
+let current = 0, score = 0, answered = false;
+
+function render() {
+  const q = QUESTIONS[current];
+  document.getElementById('q-num').textContent = `Pregunta ${current + 1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-text').textContent = `Pregunta ${current + 1} de ${QUESTIONS.length}`;
+  document.getElementById('score-label').textContent = `${score} correcta${score !== 1 ? 's' : ''}`;
+  document.getElementById('prog-fill').style.width = `${(current / QUESTIONS.length) * 100}%`;
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+
+  document.getElementById('next-btn').classList.remove('show');
+  answered = false;
+
+  document.getElementById('options').innerHTML = q.opts.map((opt, i) => `
+    <button class="opt-btn" onclick="answer(${i})" id="opt-${i}">
+      <span class="opt-letter">${['A','B','C'][i]}</span>
+      ${opt}
+    </button>`).join('');
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = QUESTIONS[current];
+  const isCorrect = idx === q.correct;
+  if (isCorrect) score++;
+
+  document.querySelectorAll('.opt-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.correct) btn.classList.add('correct');
+    else if (i === idx && !isCorrect) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.textContent = (isCorrect ? '✅ ' : '❌ ') + (isCorrect ? q.ok : q.bad);
+  fb.className = `feedback show ${isCorrect ? 'ok' : 'bad'}`;
+
+  document.getElementById('score-label').textContent = `${score} correcta${score !== 1 ? 's' : ''}`;
+
+  const nextBtn = document.getElementById('next-btn');
+  nextBtn.textContent = current < QUESTIONS.length - 1 ? 'Siguiente pregunta →' : 'Ver resultado 🎯';
+  nextBtn.classList.add('show');
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= QUESTIONS.length) {
+    showResults();
+  } else {
+    render();
+  }
+}
+
+function showResults() {
+  document.getElementById('quiz-card').style.display = 'none';
+  const res = document.getElementById('results');
+  res.classList.add('show');
+
+  const pct = score / QUESTIONS.length;
+  const tier = pct === 1 ? 4 : pct >= 0.875 ? 3 : pct >= 0.625 ? 2 : pct >= 0.375 ? 1 : 0;
+  const r = RES[tier];
+
+  document.getElementById('res-score').textContent = `${score}/${QUESTIONS.length}`;
+  document.getElementById('res-stars').textContent = r.stars;
+  document.getElementById('res-icon').textContent = r.icon;
+  document.getElementById('res-msg').textContent = r.msg;
+  document.getElementById('prog-fill').style.width = '100%';
+}
+
+function restart() {
+  current = 0; score = 0; answered = false;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('results').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guía Studio 3D — Mateo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f1f5f9;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 22px 22px;
+      min-height: 100vh;
+      padding: 28px 16px 64px;
+      color: #1e293b;
+    }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .header .icon { font-size: 3rem; display: block; margin-bottom: 8px; }
+    .header h1 { font-size: 1.8rem; font-weight: 900; }
+    .header .sub { color: #64748b; font-size: 0.88rem; margin-top: 5px; font-weight: 600; }
+
+    /* Search */
+    .search-wrap {
+      max-width: 580px; margin: 0 auto 28px;
+      position: relative;
+    }
+    .search-wrap input {
+      width: 100%; padding: 13px 18px 13px 44px;
+      border: 2px solid #e2e8f0; border-radius: 12px;
+      font-family: inherit; font-size: 0.95rem; font-weight: 700;
+      background: white; color: #1e293b;
+      outline: none; transition: border-color .2s;
+    }
+    .search-wrap input:focus { border-color: #4f46e5; }
+    .search-wrap input::placeholder { color: #94a3b8; font-weight: 600; }
+    .search-icon {
+      position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+      font-size: 1.1rem; pointer-events: none;
+    }
+
+    /* Section */
+    .section { max-width: 580px; margin: 0 auto 20px; }
+    .sec-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 12px 20px; border-radius: 12px 12px 0 0;
+      color: white; font-weight: 900; font-size: 0.95rem;
+    }
+    .sec-header .sec-icon { font-size: 1.3rem; }
+    .sec-header .sec-count { margin-left: auto; background: rgba(255,255,255,.2); padding: 2px 10px; border-radius: 99px; font-size: 0.75rem; }
+
+    .sec-body {
+      background: white; border-radius: 0 0 12px 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.07);
+      overflow: hidden;
+    }
+
+    .term-card {
+      padding: 14px 20px;
+      border-bottom: 1px solid #f1f5f9;
+      transition: background .15s;
+    }
+    .term-card:last-child { border-bottom: none; }
+    .term-card:hover { background: #fafafa; }
+
+    .term-name {
+      font-size: 0.95rem; font-weight: 900; color: #1e293b;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+    }
+    .term-emoji { font-size: 1.2rem; }
+    .term-def { font-size: 0.82rem; color: #475569; line-height: 1.55; font-weight: 600; }
+    .term-tip {
+      margin-top: 6px; font-size: 0.77rem; color: #7c3aed;
+      background: #faf5ff; border-radius: 8px; padding: 5px 10px;
+      font-weight: 700; display: inline-block;
+    }
+
+    /* Empty state for search */
+    .empty-search {
+      display: none; text-align: center;
+      padding: 48px 20px; color: #94a3b8;
+    }
+    .empty-search .icon { font-size: 2.5rem; margin-bottom: 10px; }
+    .empty-search p { font-size: 0.9rem; font-weight: 700; }
+
+    footer { text-align: center; margin-top: 40px; color: #94a3b8; font-size: 0.75rem; font-weight: 700; }
+
+    @media (max-width: 480px) {
+      .header h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <span class="icon">📚</span>
+  <h1>Guía Studio 3D</h1>
+  <p class="sub">Todo lo que aprendemos en el taller de Mateo</p>
+</header>
+
+<div class="search-wrap">
+  <span class="search-icon">🔍</span>
+  <input type="text" id="search" placeholder="Buscar un término..." oninput="filterTerms()"/>
+</div>
+
+<div id="content"></div>
+<div class="empty-search" id="empty">
+  <div class="icon">🤷</div>
+  <p>No encontré ese término.<br>¡Probá con otra palabra!</p>
+</div>
+
+<footer>Studio 3D — Manual de Mateo · Kodingo School</footer>
+
+<script>
+const SECTIONS = [
+  {
+    id: 'impresora', color: '#f97316', icon: '🖨️', name: 'La Impresora',
+    terms: [
+      { name: 'Impresora 3D', emoji: '🖨️', def: 'Una máquina que crea objetos sólidos capa por capa, usando plástico caliente.', tip: null },
+      { name: 'Bambu Lab A1', emoji: '⚙️', def: 'La impresora 3D que usamos en el taller. Es muy rápida y fácil de usar.', tip: null },
+      { name: 'Filamento PLA', emoji: '🌽', def: 'El "hilo" de plástico que usa la impresora para crear objetos. ¡Está hecho de plantas de maíz y es ecológico!', tip: 'Dato curioso: viene en rollos y muchos colores diferentes' },
+      { name: 'Nozzle (pico)', emoji: '🔥', def: 'La punta de metal de la impresora por donde sale el plástico caliente. Se calienta hasta unos 200°C.', tip: '⚠️ ¡Nunca toques el nozzle cuando la impresora está encendida!' },
+      { name: 'Capa', emoji: '🥞', def: 'Una línea finísima de plástico. La impresora apila muchas capas una encima de otra hasta formar el objeto completo.', tip: null },
+      { name: 'Placa de impresión', emoji: '📋', def: 'La superficie plana donde el objeto empieza a crecer. El primer plástico tiene que pegarse bien acá.', tip: null },
+      { name: 'Temperatura', emoji: '🌡️', def: 'El calor necesario para derretir el filamento. La impresora lo controla sola.', tip: null },
+      { name: 'Adhesión', emoji: '🧲', def: 'Qué tan bien se pega el plástico a la placa al principio. Si no se pega, el objeto se mueve y sale mal.', tip: null },
+      { name: 'Soportes', emoji: '🏗️', def: 'Estructuras temporales que la impresora hace para sostener partes del objeto que están "en el aire". Se quitan cuando termina.', tip: 'Se usan cuando el objeto tiene partes que sobresalen mucho' },
+    ]
+  },
+  {
+    id: 'bambu', color: '#0891b2', icon: '🔧', name: 'Bambu Studio',
+    terms: [
+      { name: 'Bambu Studio', emoji: '💻', def: 'El programa que traduce tu diseño 3D en instrucciones para la impresora. Es como el "traductor" entre tu diseño y la máquina.', tip: null },
+      { name: 'Altura de capa', emoji: '📏', def: 'Qué tan gruesa es cada capa de plástico. 0.2mm = normal. 0.1mm = muy fino y con más detalle.', tip: 'Capas más finas = más detalle pero más tiempo de impresión' },
+      { name: 'Relleno (infill)', emoji: '🕸️', def: 'La estructura del interior del objeto. 15% = bastante hueco. 100% = completamente sólido.', tip: 'Para la mayoría de objetos, 15-20% alcanza y ahorra filamento' },
+      { name: 'Velocidad de impresión', emoji: '⚡', def: 'Qué tan rápido se mueve la impresora. Más rápido = menos tiempo, pero a veces menos calidad.', tip: null },
+      { name: 'Tiempo de impresión', emoji: '⏱️', def: 'Cuánto tiempo tarda la impresora en terminar el objeto. Depende del tamaño, las capas y la velocidad.', tip: null },
+      { name: 'Archivo STL', emoji: '📁', def: 'El tipo de archivo que guarda tu diseño de Tinkercad. Bambu Studio lo lee para preparar la impresión.', tip: 'STL es el formato estándar para impresión 3D en todo el mundo' },
+    ]
+  },
+  {
+    id: 'tinkercad', color: '#4f46e5', icon: '💻', name: 'Tinkercad',
+    terms: [
+      { name: 'Tinkercad', emoji: '🖥️', def: 'El programa que usamos para diseñar objetos en 3D desde la computadora. Es gratis y funciona en el navegador.', tip: 'tinkercad.com — ¡solo necesitas una cuenta!' },
+      { name: 'Plano de trabajo', emoji: '🟦', def: 'La "mesa virtual" donde construyes tu diseño. Todas las formas viven ahí.', tip: null },
+      { name: 'Formas básicas', emoji: '🔷', def: 'Los bloques con los que construyes: cajas, esferas, cilindros, conos... ¡Son como los LEGOs del diseño 3D!', tip: null },
+      { name: 'Mover en 3 ejes', emoji: '🧭', def: 'Mover el objeto en 3 direcciones: izquierda/derecha (X), adelante/atrás (Y), y arriba/abajo (Z).', tip: null },
+      { name: 'Rotar', emoji: '🔄', def: 'Girar el objeto en cualquier dirección usando las flechas curvas de Tinkercad.', tip: null },
+      { name: 'Escalar', emoji: '↔️', def: 'Agrandar o achicar el objeto. Se puede cambiar solo el ancho, el alto, o todo a la vez.', tip: 'Mantené Shift mientras escalás para que no se deforme' },
+      { name: 'Agrupar', emoji: '🔗', def: 'Juntar varias formas en una sola. Después se comportan como si fueran un único objeto.', tip: 'Seleccioná todo + Ctrl+G (o el botón Agrupar arriba)' },
+      { name: 'Forma agujero', emoji: '🕳️', def: 'Una forma especial color gris que, al agrupar con otra, la "come" y hace un hueco. ¡Es la varita mágica de Tinkercad!', tip: 'Ejemplo: un cilindro agujero dentro de una caja = porta-lápices' },
+      { name: 'Texto 3D', emoji: '🔤', def: 'Una herramienta de Tinkercad para poner letras y palabras en tus diseños, en relieve o como agujero.', tip: 'Podés cambiar la fuente, el tamaño y la altura del texto' },
+      { name: 'Espejado (mirror)', emoji: '🪞', def: 'Crear una copia invertida del objeto, como si lo vieras en un espejo. Muy útil para hacer sellos.', tip: 'Un sello necesita las letras espejadas para que salgan bien al usarlo' },
+      { name: 'Exportar STL', emoji: '📤', def: 'Guardar el diseño de Tinkercad como archivo STL para poder importarlo en Bambu Studio e imprimirlo.', tip: 'Exportar STL → abrir en Bambu Studio → ¡a imprimir!' },
+    ]
+  },
+  {
+    id: 'diseno', color: '#16a34a', icon: '🎨', name: 'Proceso de Diseño',
+    terms: [
+      { name: 'Boceto', emoji: '✏️', def: 'Un dibujo rápido en papel de tu idea antes de diseñarla en la computadora. Ayuda a pensar bien el proyecto.', tip: '¡Siempre dibujá primero! Es más fácil borrar en papel que deshacer en Tinkercad' },
+      { name: 'Diseño funcional', emoji: '🔨', def: 'Un objeto que sirve para algo real: guardar monedas, sostener lápices, decorar la heladera... No es solo bonito.', tip: null },
+      { name: 'Paredes y grosor', emoji: '🧱', def: 'Qué tan gruesas son las paredes del objeto. Si son muy finas, se puede romper fácil. Si son muy gruesas, usa mucho filamento.', tip: 'Para la mayoría de objetos, 2-3mm de pared está bien' },
+      { name: 'Iterar', emoji: '🔁', def: 'Mejorar el diseño poco a poco: probar, ver qué no funciona, cambiar, volver a probar. ¡Así trabajan todos los ingenieros!', tip: null },
+      { name: 'Escalar proporcionalmente', emoji: '📐', def: 'Agrandar o achicar el objeto manteniendo las mismas proporciones, para que no se deforme.', tip: null },
+      { name: 'Diseñar en serie', emoji: '🔢', def: 'Crear varias piezas iguales (o parecidas) siguiendo el mismo proceso. Ejemplo: 4 peones para un juego de mesa.', tip: null },
+      { name: 'Presentar el proyecto', emoji: '🗣️', def: 'Explicar a otros qué diseñaste, cómo lo hiciste y para qué sirve. Es una parte importante del proceso.', tip: 'Contá: ¿qué es?, ¿cómo lo hiciste?, ¿para quién es?' },
+    ]
+  }
+];
+
+function renderAll(filter = '') {
+  const q = filter.toLowerCase().trim();
+  let totalShown = 0;
+
+  document.getElementById('content').innerHTML = SECTIONS.map(sec => {
+    const terms = q
+      ? sec.terms.filter(t =>
+          t.name.toLowerCase().includes(q) ||
+          t.def.toLowerCase().includes(q) ||
+          (t.tip && t.tip.toLowerCase().includes(q))
+        )
+      : sec.terms;
+
+    if (terms.length === 0) return '';
+    totalShown += terms.length;
+
+    return `
+      <div class="section">
+        <div class="sec-header" style="background:${sec.color}">
+          <span class="sec-icon">${sec.icon}</span>
+          ${sec.name}
+          <span class="sec-count">${terms.length} términos</span>
+        </div>
+        <div class="sec-body">
+          ${terms.map(t => `
+            <div class="term-card">
+              <div class="term-name">
+                <span class="term-emoji">${t.emoji}</span>
+                ${t.name}
+              </div>
+              <div class="term-def">${t.def}</div>
+              ${t.tip ? `<div class="term-tip">💡 ${t.tip}</div>` : ''}
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('empty').style.display = (q && totalShown === 0) ? 'block' : 'none';
+}
+
+function filterTerms() {
+  renderAll(document.getElementById('search').value);
+}
+
+renderAll();
+</script>
+</body>
+</html>
