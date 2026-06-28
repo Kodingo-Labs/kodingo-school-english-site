@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ingeniería 3D — 5to Grado</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #0f172a;
+      background-image: radial-gradient(rgba(148,163,184,.12) 1px, transparent 1px);
+      background-size: 24px 24px;
+      min-height: 100vh;
+      padding: 28px 16px 64px;
+      color: #f1f5f9;
+    }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .header .icon { font-size: 3.2rem; display: block; margin-bottom: 8px; }
+    .header h1 { font-size: 1.8rem; font-weight: 900; color: #f1f5f9; }
+    .header .sub { color: #64748b; font-size: 0.88rem; margin-top: 5px; font-weight: 700; letter-spacing: .4px; }
+
+    .progress-card {
+      max-width: 600px; margin: 0 auto 28px;
+      background: #1e293b; border-radius: 18px;
+      padding: 22px 26px; border: 1px solid #334155;
+    }
+    .prog-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    .prog-label { font-weight: 800; color: #64748b; font-size: 0.85rem; text-transform: uppercase; letter-spacing: .5px; }
+    .prog-count { font-size: 1.5rem; font-weight: 900; color: #818cf8; }
+    .prog-count span { font-size: 0.8rem; color: #475569; }
+    .bar-bg { height: 12px; background: #334155; border-radius: 99px; overflow: hidden; }
+    .bar { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 99px; transition: width .5s ease; width: 0%; }
+    .prog-msg { margin-top: 10px; font-size: 0.8rem; font-weight: 700; color: #475569; text-align: right; }
+
+    .module { max-width: 600px; margin: 0 auto 14px; }
+
+    .mod-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 20px; border-radius: 14px 14px 0 0;
+      color: white;
+    }
+    .mod-badge {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.05rem; flex-shrink: 0;
+    }
+    .mod-info { flex: 1; }
+    .mod-name { font-size: 0.95rem; font-weight: 900; line-height: 1.2; }
+    .mod-desc { font-size: 0.72rem; opacity: .8; margin-top: 2px; font-weight: 600; }
+    .mod-check { font-size: 0.72rem; font-weight: 800; background: rgba(255,255,255,.18); padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+
+    .mod-body { background: #1e293b; border-radius: 0 0 14px 14px; border: 1px solid #334155; border-top: none; overflow: hidden; }
+
+    .cls-card {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 14px 20px;
+      border-bottom: 1px solid #1e293b;
+      cursor: pointer; transition: background .15s; user-select: none;
+      background: #1e2d3d;
+    }
+    .cls-card:last-child { border-bottom: none; }
+    .cls-card:hover { background: #243347; }
+    .cls-card.done { background: #0f2e1c; }
+    .cls-card.done:hover { background: #134020; }
+
+    .cls-checkbox {
+      width: 26px; height: 26px; flex-shrink: 0;
+      border: 2.5px solid #334155; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.9rem; transition: all .2s; margin-top: 2px;
+    }
+    .cls-card.done .cls-checkbox { background: #22c55e; border-color: #22c55e; color: white; }
+
+    .cls-body { flex: 1; min-width: 0; }
+    .cls-top { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; flex-wrap: wrap; }
+    .cls-num { font-size: 0.67rem; font-weight: 900; color: #475569; text-transform: uppercase; letter-spacing: .5px; }
+
+    .badge { font-size: 0.62rem; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+    .b-inv   { background: rgba(20,184,166,.15); color: #5eead4; }
+    .b-tol   { background: rgba(99,102,241,.15); color: #a5b4fc; }
+    .b-opt   { background: rgba(245,158,11,.15); color: #fcd34d; }
+    .b-func  { background: rgba(249,115,22,.15); color: #fdba74; }
+    .b-eng   { background: rgba(236,72,153,.15); color: #f9a8d4; }
+
+    .cls-name { font-size: 0.92rem; font-weight: 800; color: #e2e8f0; margin-bottom: 5px; line-height: 1.3; }
+    .cls-card.done .cls-name { color: #4ade80; }
+    .cls-meta { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .cls-dur { font-size: 0.72rem; color: #475569; font-weight: 700; }
+    .cls-diff { font-size: 0.7rem; letter-spacing: 1px; }
+    .cls-result { margin-top: 5px; font-size: 0.75rem; color: #475569; line-height: 1.5; font-style: italic; }
+    .cls-card.done .cls-result { display: none; }
+
+    /* Celebration */
+    .overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.7); z-index: 100;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .overlay.show { display: flex; }
+    .cel-box {
+      background: #1e293b; border-radius: 24px; border: 1px solid #334155;
+      padding: 44px 36px; text-align: center; max-width: 380px; width: 100%;
+      box-shadow: 0 24px 60px rgba(0,0,0,.5);
+      animation: pop .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    @keyframes pop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .cel-trophy { font-size: 5rem; display: block; margin-bottom: 12px; }
+    .cel-box h2 { font-size: 1.7rem; font-weight: 900; margin-bottom: 10px; color: #f1f5f9; }
+    .cel-box p { color: #64748b; line-height: 1.7; font-size: 0.93rem; }
+    .cel-btn {
+      margin-top: 24px; padding: 13px 32px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white; border: none; border-radius: 99px;
+      font-family: inherit; font-size: 1rem; font-weight: 900;
+      cursor: pointer;
+    }
+
+    footer { text-align: center; margin-top: 40px; color: #334155; font-size: 0.75rem; font-weight: 700; }
+
+    @media (max-width: 480px) {
+      .header h1 { font-size: 1.5rem; }
+      .cls-card { padding: 12px 14px; gap: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <span class="icon">⚙️</span>
+  <h1>Ingeniería 3D</h1>
+  <p class="sub">5TO GRADO · TINKERCAD + BAMBU LAB A1 · 15 CLASES</p>
+</header>
+
+<div class="progress-card">
+  <div class="prog-top">
+    <span class="prog-label">Progreso total</span>
+    <div class="prog-count"><span id="cnt">0</span> <span>/ 15 clases</span></div>
+  </div>
+  <div class="bar-bg"><div class="bar" id="bar"></div></div>
+  <p class="prog-msg" id="prog-msg">Empezá la Clase 1</p>
+</div>
+
+<div id="modules"></div>
+
+<div class="overlay" id="overlay">
+  <div class="cel-box">
+    <span class="cel-trophy">🏆</span>
+    <h2>¡Proyecto de Ingeniería completado!</h2>
+    <p>Terminaste las 15 clases. Sabés diseñar, optimizar e imprimir objetos funcionales en 3D. Estás listo para la próxima etapa.</p>
+    <button class="cel-btn" onclick="document.getElementById('overlay').classList.remove('show')">¡Genial! 🚀</button>
+  </div>
+</div>
+
+<footer>Ingeniería 3D · 5to Grado · Kodingo School</footer>
+
+<script>
+const MODULES = [
+  {
+    num:1, emoji:'🔍', color:'#0f766e',
+    name:'Ingeniería Inversa',
+    desc:'Analizar, medir y reproducir objetos reales',
+    classes:[
+      { num:1, type:'inv', name:'Desmontamos y medimos un objeto cotidiano', dur:'45 min', diff:2, result:'Un boceto técnico con cotas del objeto real en 3 vistas' },
+      { num:2, type:'inv', name:'Recreamos el objeto en Tinkercad con medidas exactas', dur:'50 min', diff:3, result:'El modelo 3D del objeto medido exportado como STL' },
+      { num:3, type:'inv', name:'Imprimimos y comparamos con el original', dur:'45 min', diff:2, result:'Análisis de diferencias entre diseño y pieza impresa, en mm y %' }
+    ]
+  },
+  {
+    num:2, emoji:'📏', color:'#1d4ed8',
+    name:'Tolerancias y Encastres',
+    desc:'Diseñar piezas que se conectan con precisión',
+    classes:[
+      { num:4, type:'tol', name:'¿Por qué la pieza impresa no mide exactamente lo diseñado?', dur:'45 min', diff:3, result:'Tabla de errores con factor de corrección para la impresora' },
+      { num:5, type:'tol', name:'Diseñamos un encastre que funciona (ajuste deslizante)', dur:'50 min', diff:4, result:'Dos piezas macho/hembra que encajan perfectamente con 0.3mm de tolerancia' },
+      { num:6, type:'tol', name:'Sistema de piezas modulares intercambiables', dur:'60 min', diff:4, result:'3 módulos con conector estándar que se unen entre sí' }
+    ]
+  },
+  {
+    num:3, emoji:'⚡', color:'#b45309',
+    name:'Optimización de Impresión',
+    desc:'Elegir la configuración correcta para cada uso',
+    classes:[
+      { num:7, type:'opt', name:'Orientación: misma pieza, 3 orientaciones, 3 resistencias', dur:'60 min', diff:3, result:'La misma pieza impresa en 3 orientaciones y comparativa de resistencia' },
+      { num:8, type:'opt', name:'Infill avanzado: gyroid, honeycomb y lightning comparados', dur:'50 min', diff:3, result:'3 cubos con diferente patrón de relleno + análisis de peso y resistencia' },
+      { num:9, type:'opt', name:'Multi-color: cambio de filamento en una capa específica', dur:'45 min', diff:2, result:'Un objeto con dos colores en capas diferenciadas' }
+    ]
+  },
+  {
+    num:4, emoji:'🔩', color:'#7c3aed',
+    name:'Proyectos Funcionales',
+    desc:'Diseñar objetos que se usan en la vida real',
+    classes:[
+      { num:10, type:'func', name:'Una bisagra impresa en una sola pieza', dur:'60 min', diff:5, result:'Bisagra funcional que se mueve sin ensamble posterior' },
+      { num:11, type:'func', name:'Organizador modular con compartimentos intercambiables', dur:'60 min', diff:4, result:'Sistema de 4 compartimentos con base y conectores estándar' },
+      { num:12, type:'func', name:'Soporte a medida para un dispositivo tuyo', dur:'60 min', diff:4, result:'Soporte que sostiene perfectamente tu celular, tablet o auriculares' }
+    ]
+  },
+  {
+    num:5, emoji:'🚀', color:'#be123c',
+    name:'Proyecto de Ingeniería',
+    desc:'Identificar un problema real y diseñar la solución',
+    classes:[
+      { num:13, type:'eng', name:'Definir el problema + boceto técnico con cotas', dur:'45 min', diff:3, result:'Brief técnico: problema, usuarios, requisitos, boceto con medidas' },
+      { num:14, type:'eng', name:'Diseñar en Tinkercad y planificar la impresión óptima', dur:'60 min', diff:5, result:'Diseño completo en Tinkercad + análisis de configuración de impresión' },
+      { num:15, type:'eng', name:'Imprimir, probar y presentar el proceso técnico', dur:'60 min', diff:3, result:'Objeto terminado + presentación de 5 min documentando el proceso' }
+    ]
+  }
+];
+
+const TYPE = {
+  inv:  { label:'🔍 Ing. Inversa', cls:'b-inv' },
+  tol:  { label:'📏 Tolerancias', cls:'b-tol' },
+  opt:  { label:'⚡ Optimización', cls:'b-opt' },
+  func: { label:'🔩 Funcional', cls:'b-func' },
+  eng:  { label:'🚀 Ingeniería', cls:'b-eng' }
+};
+
+const MSGS = [
+  'Empezá la Clase 1',
+  '¡Buen inicio, seguí así!',
+  '¡Vas muy bien!',
+  'Excelente progreso',
+  '¡Ya vas por la mitad!',
+  '¡Más de la mitad, fenómeno!',
+  '¡Casi terminás!',
+  '¡Una más y lo lográs!',
+  '¡Proyecto de Ingeniería completado! 🎉'
+];
+
+function stars(n) { return '★'.repeat(n) + '☆'.repeat(5-n); }
+function key(n) { return `e3d_c${n}`; }
+function done(n) { return localStorage.getItem(key(n)) === '1'; }
+
+function updateProgress() {
+  let d = 0;
+  for (let i = 1; i <= 15; i++) if (done(i)) d++;
+  document.getElementById('cnt').textContent = d;
+  document.getElementById('bar').style.width = `${(d/15)*100}%`;
+  const idx = d===15?8:d===0?0:Math.min(Math.floor(d/2)+1,7);
+  document.getElementById('prog-msg').textContent = MSGS[idx];
+  MODULES.forEach(mod => {
+    const mdone = mod.classes.filter(c => done(c.num)).length;
+    const el = document.getElementById(`mchk-${mod.num}`);
+    if (el) el.textContent = `${mdone}/3`;
+  });
+  if (d === 15) setTimeout(() => document.getElementById('overlay').classList.add('show'), 400);
+}
+
+function toggle(num) {
+  const card = document.querySelector(`[data-cls="${num}"]`);
+  const nowDone = !done(num);
+  localStorage.setItem(key(num), nowDone ? '1' : '0');
+  card.classList.toggle('done', nowDone);
+  card.querySelector('.cls-checkbox').textContent = nowDone ? '✓' : '';
+  updateProgress();
+}
+
+function render() {
+  document.getElementById('modules').innerHTML = MODULES.map(mod => `
+    <div class="module">
+      <div class="mod-header" style="background:${mod.color}">
+        <div class="mod-badge">${mod.emoji}</div>
+        <div class="mod-info">
+          <div class="mod-name">Módulo ${mod.num} — ${mod.name}</div>
+          <div class="mod-desc">${mod.desc}</div>
+        </div>
+        <div class="mod-check" id="mchk-${mod.num}">0/3</div>
+      </div>
+      <div class="mod-body">
+        ${mod.classes.map(c => {
+          const isDone = done(c.num);
+          const t = TYPE[c.type];
+          return `
+            <div class="cls-card${isDone?' done':''}" data-cls="${c.num}" onclick="toggle(${c.num})">
+              <div class="cls-checkbox">${isDone?'✓':''}</div>
+              <div class="cls-body">
+                <div class="cls-top">
+                  <span class="cls-num">Clase ${c.num}</span>
+                  <span class="badge ${t.cls}">${t.label}</span>
+                </div>
+                <div class="cls-name">${c.name}</div>
+                <div class="cls-meta">
+                  <span class="cls-dur">⏱️ ${c.dur}</span>
+                  <span class="cls-diff">${stars(c.diff)}</span>
+                </div>
+                <div class="cls-result">🎯 ${c.result}</div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+  updateProgress();
+}
+
+render();
+</script>
+</body>
+</html>

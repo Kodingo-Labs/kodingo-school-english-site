@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Guía Ingeniería 3D — 5to Grado</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #0f172a;
+      background-image: radial-gradient(rgba(148,163,184,.12) 1px, transparent 1px);
+      background-size: 24px 24px;
+      min-height: 100vh;
+      padding: 24px 16px 64px;
+      color: #e2e8f0;
+    }
+
+    .header { text-align: center; margin-bottom: 24px; }
+    .header .icon { font-size: 2.6rem; display: block; margin-bottom: 6px; }
+    .header h1 { font-size: 1.65rem; font-weight: 900; color: #f1f5f9; }
+    .header .sub { color: #475569; font-size: 0.83rem; margin-top: 4px; font-weight: 700; letter-spacing: .4px; }
+
+    /* Module filter */
+    .mod-filter {
+      display: flex; gap: 6px; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 18px;
+      max-width: 660px; margin-inline: auto;
+    }
+    .mod-btn {
+      padding: 7px 14px; border-radius: 99px; border: none;
+      font-family: inherit; font-size: 0.78rem; font-weight: 800;
+      cursor: pointer; background: #1e293b; color: #475569;
+      border: 1px solid #334155; transition: all .2s;
+    }
+    .mod-btn:hover { border-color: #475569; color: #94a3b8; }
+    .mod-btn.active { color: white; border-color: transparent; }
+
+    /* Class list */
+    .class-list { max-width: 660px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+    .cls-wrap { border-radius: 16px; overflow: hidden; border: 1px solid #334155; }
+
+    .cls-header {
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 18px; cursor: pointer; user-select: none;
+      background: #1e293b; border-bottom: 1px solid transparent; transition: background .15s;
+    }
+    .cls-header:hover { background: #243347; }
+    .cls-wrap.open .cls-header { border-bottom-color: #334155; }
+
+    .cls-num-badge {
+      width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.83rem; font-weight: 900; color: white;
+    }
+    .cls-hinfo { flex: 1; min-width: 0; }
+    .cls-htitle { font-size: 0.9rem; font-weight: 900; line-height: 1.3; color: #e2e8f0; }
+    .cls-hmeta { display: flex; gap: 8px; margin-top: 3px; flex-wrap: wrap; align-items: center; }
+
+    .badge { font-size: 0.61rem; font-weight: 800; padding: 2px 8px; border-radius: 99px; }
+    .b-inv   { background: rgba(20,184,166,.18); color: #5eead4; }
+    .b-tol   { background: rgba(99,102,241,.18); color: #a5b4fc; }
+    .b-opt   { background: rgba(245,158,11,.18); color: #fcd34d; }
+    .b-func  { background: rgba(249,115,22,.18); color: #fdba74; }
+    .b-eng   { background: rgba(236,72,153,.18); color: #f9a8d4; }
+
+    .cls-dur { font-size: 0.7rem; color: #475569; font-weight: 700; }
+    .cls-diff { font-size: 0.68rem; }
+    .cls-chevron { color: #334155; font-size: 1.2rem; transition: transform .25s; flex-shrink: 0; }
+    .cls-wrap.open .cls-chevron { transform: rotate(90deg); }
+
+    /* Guide content */
+    .cls-guide { display: none; background: #1a2537; }
+    .cls-wrap.open .cls-guide { display: block; }
+
+    .guide-section { padding: 16px 20px; border-bottom: 1px solid #1e293b; }
+    .guide-section:last-child { border-bottom: none; }
+    .gs-title {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 0.72rem; font-weight: 900; text-transform: uppercase;
+      letter-spacing: .6px; color: #475569; margin-bottom: 10px;
+    }
+
+    /* Objetivo */
+    .objetivo-text {
+      font-size: 0.9rem; font-weight: 700; color: #e2e8f0;
+      background: #1e293b; border-radius: 10px; padding: 11px 14px;
+      border-left: 3px solid #6366f1; line-height: 1.5;
+    }
+
+    /* Conceptos clave */
+    .conceptos { display: flex; flex-wrap: wrap; gap: 8px; }
+    .concepto {
+      background: #1e293b; border: 1px solid #334155;
+      border-radius: 10px; padding: 9px 13px;
+    }
+    .concepto-term { font-size: 0.82rem; font-weight: 900; color: #a5b4fc; margin-bottom: 2px; }
+    .concepto-def  { font-size: 0.75rem; font-weight: 700; color: #475569; line-height: 1.4; }
+
+    /* Necesitás */
+    .needs-list { display: flex; flex-direction: column; gap: 6px; }
+    .need-item { display: flex; align-items: flex-start; gap: 8px; font-size: 0.83rem; font-weight: 700; color: #94a3b8; }
+    .need-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* Config Bambu */
+    .bambu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .bambu-item { background: #1e293b; border-radius: 10px; padding: 10px 12px; border: 1px solid #1d4ed8; }
+    .bambu-label { font-size: 0.66rem; font-weight: 900; color: #60a5fa; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 2px; }
+    .bambu-val { font-size: 0.86rem; font-weight: 800; color: #bfdbfe; }
+
+    /* Steps */
+    .steps-list { display: flex; flex-direction: column; gap: 8px; }
+    .step { display: flex; gap: 10px; align-items: flex-start; }
+    .step-num {
+      width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 900; color: white; margin-top: 2px;
+    }
+    .step-text { font-size: 0.85rem; font-weight: 700; color: #94a3b8; line-height: 1.55; flex: 1; }
+    .step-text strong { color: #e2e8f0; }
+
+    /* Para pensar */
+    .reflexion-list { display: flex; flex-direction: column; gap: 8px; }
+    .reflexion {
+      display: flex; gap: 8px; align-items: flex-start;
+      background: #1e293b; border-radius: 10px; padding: 10px 13px;
+      border: 1px solid #334155;
+    }
+    .ref-icon { font-size: 1rem; flex-shrink: 0; }
+    .ref-text { font-size: 0.82rem; font-weight: 700; color: #94a3b8; line-height: 1.5; }
+
+    /* Tips */
+    .tips-list { display: flex; flex-direction: column; gap: 8px; }
+    .tip {
+      display: flex; gap: 8px; align-items: flex-start;
+      background: rgba(250,204,21,.06); border-radius: 10px; padding: 10px 12px;
+      border: 1px solid rgba(250,204,21,.15);
+    }
+    .tip-icon { font-size: 1rem; flex-shrink: 0; }
+    .tip-text { font-size: 0.82rem; font-weight: 700; color: #a16207; line-height: 1.5; }
+    .tip-text { color: #fde68a; }
+
+    /* Alert */
+    .extra-alert {
+      background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25);
+      border-radius: 10px; padding: 10px 14px;
+      font-size: 0.82rem; font-weight: 800; color: #fca5a5;
+      display: flex; gap: 8px; align-items: flex-start; margin-top: 8px;
+    }
+
+    footer { text-align: center; margin-top: 40px; color: #334155; font-size: 0.73rem; font-weight: 700; }
+
+    @media (max-width: 480px) {
+      .cls-header { padding: 12px 14px; }
+      .guide-section { padding: 14px 15px; }
+      .bambu-grid { grid-template-columns: 1fr; }
+      .conceptos { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <span class="icon">📐</span>
+  <h1>Guía de Clases</h1>
+  <p class="sub">INGENIERÍA 3D · 5TO GRADO · BAMBU LAB A1 + TINKERCAD</p>
+</header>
+
+<div class="mod-filter" id="mod-filter"></div>
+<div class="class-list" id="class-list"></div>
+
+<footer>Ingeniería 3D · 5to Grado · Kodingo School</footer>
+
+<script>
+const MOD_COLORS = ['#0f766e','#1d4ed8','#b45309','#7c3aed','#be123c'];
+
+const CLASSES = [
+  /* ─── MÓDULO 1 ─────────────────────────────────── */
+  {
+    num:1, mod:1, type:'inv', dur:'45 min', diff:2,
+    name:'Desmontamos y medimos un objeto cotidiano',
+    objetivo:'Analizar un objeto real y producir un boceto técnico con cotas (dimensiones en mm) desde 3 vistas: frente, lateral y superior.',
+    conceptos:[
+      { t:'Ingeniería inversa', d:'Analizar un objeto ya construido para entender cómo fue diseñado.' },
+      { t:'Cota', d:'Medida dimensional en un plano técnico, expresada en mm.' },
+      { t:'Vistas ortogonales', d:'Dibujar el objeto desde arriba, frente y costado.' }
+    ],
+    needs:[
+      { icon:'📏', text:'Calibre o regla milimétrica' },
+      { icon:'📦', text:'Objeto cotidiano pequeño: goma, lapicera, tarjetero, etc.' },
+      { icon:'📄', text:'Papel cuadriculado y lápiz' }
+    ],
+    bambu:null,
+    steps:[
+      { s:'Elegí el objeto. Obs ervalo: ¿cuántas partes tiene? ¿Qué formas básicas ves?' },
+      { s:'Medí las dimensiones principales con el calibre: largo, ancho, alto. Anotá.' },
+      { s:'Dibujá en papel cuadriculado las <strong>3 vistas</strong>: frente, lateral derecho y superior.' },
+      { s:'Agregá las cotas (medidas) en cada vista con flechas y números en mm.' },
+      { s:'Identificá qué formas básicas de Tinkercad usarías: cajas, cilindros, esferas, etc.' },
+      { s:'Hacé una lista de "ingredientes": "2 cajas + 1 cilindro + 1 hole".' }
+    ],
+    reflexion:[
+      '¿Cuántas formas básicas distintas tiene el objeto? ¿Alguna es un "hole"?',
+      '¿Hay alguna medida que no podés medir directamente? ¿Cómo la calculás?'
+    ],
+    tips:[
+      'Un calibre digital es ideal, pero una regla milimétrica alcanza para empezar.',
+      'No hace falta que el boceto sea perfecto — lo importante es que tenga las medidas.',
+      'Si el objeto es muy complejo, simplificalo: enfocate en la forma principal.'
+    ]
+  },
+  {
+    num:2, mod:1, type:'inv', dur:'50 min', diff:3,
+    name:'Recreamos el objeto en Tinkercad con medidas exactas',
+    objetivo:'Construir en Tinkercad el modelo del objeto medido en la clase 1, usando las cotas del boceto como referencia exacta.',
+    conceptos:[
+      { t:'Precisión dimensional', d:'Que el modelo digital tenga las mismas medidas que el objeto real.' },
+      { t:'Exportar STL', d:'Convertir el diseño de Tinkercad a un archivo que la impresora puede leer.' }
+    ],
+    needs:[
+      { icon:'📄', text:'El boceto de la Clase 1 con cotas' },
+      { icon:'💻', text:'Tinkercad (tinkercad.com)' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA', infill:'15%', soportes:'Según diseño', extra:'Tamaño máximo recomendado: 80×80×60mm' },
+    steps:[
+      { s:'Abrí Tinkercad → New 3D Design. Poné el boceto <strong>visible al lado de la pantalla</strong>.' },
+      { s:'Empezá por la <strong>forma más grande</strong>. Usá las cotas del boceto como referencia.' },
+      { s:'Agregá las formas secundarias. Usá <strong>Align</strong> para centrar con precisión.' },
+      { s:'Aplicá los holes donde corresponda (partes huecas del objeto original).' },
+      { s:'Comparación intermedia: mirá el modelo desde las mismas 3 vistas del boceto. ¿Coinciden las proporciones?' },
+      { s:'Cuando estés conforme, Export → <strong>.STL</strong>. Abrí en Bambu Studio y revisá el preview.' },
+      { s:'Print. Guardá el STL con nombre descriptivo: "objeto-original-v1.stl".' }
+    ],
+    reflexion:[
+      '¿Qué fue lo más difícil de reproducir? ¿Por qué?',
+      '¿Hay alguna forma en el objeto real que no podés hacer en Tinkercad? ¿Qué harías?'
+    ],
+    tips:[
+      'Tinkercad muestra las dimensiones en tiempo real al seleccionar un objeto. Úsalo para verificar.',
+      'Si el objeto tiene curvas complejas, simplificalas: usá un cilindro en vez de una curva perfecta.',
+      'Align + centrado en X e Y es esencial para que las formas queden simétricas.'
+    ]
+  },
+  {
+    num:3, mod:1, type:'inv', dur:'45 min', diff:2,
+    name:'Imprimimos y comparamos con el original',
+    objetivo:'Medir la pieza impresa y compararla con el objeto original y el diseño digital. Calcular el error porcentual.',
+    conceptos:[
+      { t:'Error dimensional', d:'Diferencia entre la medida diseñada y la medida real de la pieza impresa.' },
+      { t:'Error porcentual', d:'Error / medida original × 100. Ejemplo: 0.3mm en 30mm = 1% de error.' },
+      { t:'Factor de corrección', d:'Multiplicador que compensa el error. Si la pieza sale 1% más pequeña, se diseña 1% más grande.' }
+    ],
+    needs:[
+      { icon:'📁', text:'STL de la Clase 2' },
+      { icon:'🖨️', text:'Bambu Lab A1 + filamento PLA' },
+      { icon:'📏', text:'Calibre para medir la pieza impresa' },
+      { icon:'📄', text:'Tabla de comparación (papel y lápiz)' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA', infill:'15%', soportes:'Según diseño', extra:null },
+    steps:[
+      { s:'Imprimí la pieza de la Clase 2.' },
+      { s:'Cuando esté fría, medí con el calibre las mismas dimensiones que mediste en el objeto original.' },
+      { s:'Completá la tabla de comparación:\n Dimensión | Original | Diseño | Impreso | Diferencia' },
+      { s:'Calculá el error: diferencia / original × 100 = error %.' },
+      { s:'¿El error es consistente en todas las dimensiones, o varía? Anotá la conclusión.' },
+      { s:'Calculá el factor de corrección para la próxima vez: si sale 0.5% más pequeño, diseñá 0.5% más grande.' }
+    ],
+    reflexion:[
+      '¿El error es mayor en X, en Y o en Z? ¿Por qué creés que pasa eso?',
+      '¿Con qué herramienta en la clase anterior podés compensar este error automáticamente?'
+    ],
+    tips:[
+      'El error típico de una Bambu A1 es menor a 0.5% — es muy precisa.',
+      'El eje Z suele tener menos error que X e Y porque depende de la altura de capa.',
+      'Guardá esta tabla: vas a necesitarla para calcular tolerancias en la Clase 5.'
+    ]
+  },
+
+  /* ─── MÓDULO 2 ─────────────────────────────────── */
+  {
+    num:4, mod:2, type:'tol', dur:'45 min', diff:3,
+    name:'¿Por qué la pieza impresa no mide exactamente lo diseñado?',
+    objetivo:'Entender por qué la impresión FDM produce piezas ligeramente más pequeñas y encontrar el factor de corrección para esta impresora.',
+    conceptos:[
+      { t:'Contracción térmica', d:'El plástico se encoge al enfriarse. Esto hace que la pieza impresa sea ligeramente más pequeña.' },
+      { t:'Tolerancia de fabricación', d:'Rango de error aceptable en una dimensión. Ej: 20mm ± 0.3mm.' },
+      { t:'FDM', d:'Fused Deposition Modeling: el método de impresión 3D que usa la Bambu A1 (filamento fundido).' }
+    ],
+    needs:[
+      { icon:'💻', text:'Tinkercad' },
+      { icon:'🖨️', text:'Bambu Lab A1 + PLA' },
+      { icon:'📏', text:'Calibre' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA', infill:'20%', soportes:'No', extra:'Imprimí los 3 cubos juntos en un solo trabajo' },
+    steps:[
+      { s:'Diseñá en Tinkercad 3 cubos: <strong>20×20×20mm</strong>, <strong>30×30×30mm</strong> y <strong>50×50×20mm</strong>.' },
+      { s:'Exportá los 3 en un mismo STL. En Bambu Studio, ponelos separados en la placa.' },
+      { s:'Imprimí con infill 20% para que sean sólidos y fáciles de medir.' },
+      { s:'Cuando estén fríos, medí cada dimensión de los 3 cubos con el calibre. Anotá todo.' },
+      { s:'Calculá el error promedio en X, Y y Z para cada cubo.' },
+      { s:'¿El error escala con el tamaño? Hacé la tabla: error en mm y error en %.' },
+      { s:'Conclusión: encontrá el factor de corrección promedio de esta impresora.' }
+    ],
+    reflexion:[
+      '¿El error en porcentaje es constante sin importar el tamaño del objeto?',
+      '¿Cuándo importa mucho el error y cuándo no importa casi nada?'
+    ],
+    tips:[
+      'El PLA de la Bambu A1 suele contraerse entre 0.2% y 0.5%. Menos que muchos materiales.',
+      'Para objetos decorativos, el error no importa. Para piezas que deben encajar, es crítico.',
+      'Guardá este factor de corrección — lo vas a aplicar en la Clase 5.'
+    ]
+  },
+  {
+    num:5, mod:2, type:'tol', dur:'50 min', diff:4,
+    name:'Diseñamos un encastre que funciona (ajuste deslizante)',
+    objetivo:'Diseñar dos piezas (macho y hembra) que se conecten con un ajuste deslizante, aplicando la tolerancia correcta.',
+    conceptos:[
+      { t:'Ajuste deslizante', d:'Las piezas se unen con un poco de juego — entran fácil pero no se mueven solas.' },
+      { t:'Ajuste a presión', d:'Las piezas se unen con fuerza y quedan fijas sin pegamento.' },
+      { t:'Clearance', d:'El espacio extra que se deja entre dos piezas para que encajen. Típico: 0.2mm–0.5mm por lado.' }
+    ],
+    needs:[
+      { icon:'💻', text:'Tinkercad' },
+      { icon:'🖨️', text:'Bambu Lab A1 + PLA' },
+      { icon:'📏', text:'Calibre' },
+      { icon:'📄', text:'Tabla de corrección de la Clase 4' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA', infill:'20%', soportes:'No', extra:'Imprimí macho y hembra en el mismo trabajo' },
+    steps:[
+      { s:'<strong>Pieza macho:</strong> Caja de 30×30×15mm con un pin cuadrado de 10×10×8mm centrado en la cara superior.' },
+      { s:'<strong>Pieza hembra:</strong> Caja de 30×30×15mm con un hueco de <strong>10.6×10.6×8.5mm</strong> (pin + 0.3mm por lado de clearance).' },
+      { s:'Usá Align para centrar el pin en la macho y el hueco en la hembra.' },
+      { s:'Exportá los dos en un STL. Imprimí juntos.' },
+      { s:'Probá el encastre: ¿desliza bien? ¿Queda suelto? ¿Queda muy ajustado?' },
+      { s:'Si no funciona: anotá qué pasó y diseñá una versión 2 ajustando el clearance.' }
+    ],
+    reflexion:[
+      '¿Qué pasa si ponés 0.1mm de clearance en vez de 0.3mm?',
+      '¿Para qué objeto real usarías un ajuste a presión? ¿Para cuál usarías deslizante?'
+    ],
+    tips:[
+      'Para ajuste deslizante con PLA: 0.25mm–0.35mm de clearance por lado. Empezá con 0.3mm.',
+      'Para ajuste a presión: 0.05mm–0.1mm de clearance. Las piezas van a necesitar fuerza para unirse.',
+      'Imprimí siempre ambas piezas juntas para que tengan las mismas condiciones de temperatura.'
+    ]
+  },
+  {
+    num:6, mod:2, type:'tol', dur:'60 min', diff:4,
+    name:'Sistema de piezas modulares intercambiables',
+    objetivo:'Diseñar un conector estándar y tres módulos diferentes que se unan entre sí usando ese conector.',
+    conceptos:[
+      { t:'Modularidad', d:'Diseñar piezas independientes que funcionan juntas gracias a una interfaz común.' },
+      { t:'Interfaz estándar', d:'El conector que comparten todos los módulos. Si cambia, nada encaja.' },
+      { t:'Interoperabilidad', d:'Cualquier módulo puede conectarse con cualquier otro.' }
+    ],
+    needs:[
+      { icon:'💻', text:'Tinkercad' },
+      { icon:'🖨️', text:'Bambu Lab A1 + PLA (idealmente 3 colores)' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA', infill:'20%', soportes:'No', extra:'Imprimí los 3 módulos en el mismo trabajo si caben' },
+    steps:[
+      { s:'<strong>Definí el conector estándar</strong>: pin cuadrado de 8×8×5mm (macho) y hueco de 8.6×8.6×5.5mm (hembra) con 0.3mm de clearance.' },
+      { s:'<strong>Módulo base</strong>: caja 40×40×10mm con pin macho en una cara y hueco hembra en la cara opuesta.' },
+      { s:'<strong>Módulo 2</strong>: cilindro hueco (organizador). Mismas conexiones que el base.' },
+      { s:'<strong>Módulo 3</strong>: L-shape (ángulo de 90°). Mismas conexiones.' },
+      { s:'Exportá los 3 módulos en STLs separados. Imprimí con colores distintos si podés.' },
+      { s:'Probá todas las combinaciones: ¿cualquiera encaja con cualquiera?' }
+    ],
+    reflexion:[
+      '¿Qué pasa si uno de los módulos tiene el conector 0.1mm más grande que los otros?',
+      '¿Conocés algún sistema modular real que funcione igual? (Lego, USB, tuberías...)'
+    ],
+    tips:[
+      'El conector estándar es lo más importante — si está bien, todo lo demás funciona.',
+      'Imprimí primero solo el conector y probalo antes de hacer los 3 módulos completos.',
+      'Con 3 módulos ya tenés 6 combinaciones posibles. ¡Eso es el poder de la modularidad!'
+    ]
+  },
+
+  /* ─── MÓDULO 3 ─────────────────────────────────── */
+  {
+    num:7, mod:3, type:'opt', dur:'60 min', diff:3,
+    name:'Orientación: misma pieza, 3 orientaciones, 3 resistencias',
+    objetivo:'Imprimir la misma pieza en 3 orientaciones diferentes y comparar cuál es más resistente a la rotura.',
+    conceptos:[
+      { t:'Líneas de capa', d:'Las capas son la zona más débil de la pieza — la rotura suele seguirlas.' },
+      { t:'Orientación óptima', d:'Poner la pieza de modo que las fuerzas vayan perpendiculares a las capas.' },
+      { t:'Anisotropía', d:'La pieza impresa no es igual de resistente en todas las direcciones.' }
+    ],
+    needs:[
+      { icon:'💻', text:'Tinkercad: diseñá un gancho simple (L de 60×30mm con 8mm de grosor)' },
+      { icon:'🖨️', text:'Bambu Lab A1 + PLA' },
+      { icon:'⚖️', text:'Pesas o libros para aplicar carga (500g–1kg)' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA', infill:'30%', soportes:'En orientación 2 y 3', extra:'Imprimí los 3 por separado o bien identificados con texto en relieve' },
+    steps:[
+      { s:'Diseñá el gancho en Tinkercad: forma L con dimensiones 60×30×8mm.' },
+      { s:'En Bambu Studio, orientalo de 3 formas: <strong>A</strong> = parado (pared L vertical), <strong>B</strong> = plano (L horizontal), <strong>C</strong> = acostado (L de costado).' },
+      { s:'Slice cada orientación y anotá: tiempo, soportes necesarios y cantidad de material.' },
+      { s:'Imprimí los 3 ganchos. Marcalos A, B y C.' },
+      { s:'Colgá cada gancho y colgá peso progresivamente. Anotá con cuántos gramos se dobló o rompió.' },
+      { s:'Conclusión: ¿cuál orientación da más resistencia? ¿Coincide con la predicción?' }
+    ],
+    reflexion:[
+      '¿Por qué la orientación cambia tanto la resistencia si es el mismo diseño?',
+      '¿En qué dirección aplicarías la fuerza para que cualquier pieza sea más resistente?'
+    ],
+    tips:[
+      'La orientación A (parada) suele ser la más resistente para un gancho — la fuerza va perpendicular a las capas.',
+      'Más soportes no es necesariamente malo — a veces valen la pena para la orientación óptima.',
+      'Este experimento es el mismo que hacen los ingenieros para certificar piezas de avión.'
+    ]
+  },
+  {
+    num:8, mod:3, type:'opt', dur:'50 min', diff:3,
+    name:'Infill avanzado: gyroid, honeycomb y lightning comparados',
+    objetivo:'Imprimir el mismo cubo con tres patrones de relleno distintos y comparar peso, resistencia y tiempo de impresión.',
+    conceptos:[
+      { t:'Gyroid', d:'Patrón con resistencia igual en todas las direcciones. Ideal para piezas que reciben fuerzas variadas.' },
+      { t:'Honeycomb', d:'Patrón hexagonal. Muy resistente con poco material. Ideal para piezas que reciben carga vertical.' },
+      { t:'Lightning', d:'Patrón mínimo para piezas decorativas. Muy rápido, muy ligero, poca resistencia.' }
+    ],
+    needs:[
+      { icon:'💻', text:'Bambu Studio (los patrones se eligen ahí, no en Tinkercad)' },
+      { icon:'🖨️', text:'Bambu Lab A1 + PLA' },
+      { icon:'⚖️', text:'Balanza para pesar los cubos (opcional)' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA', infill:'20%', soportes:'No', extra:'El mismo cubo 40×40×40mm, solo cambia el patrón de relleno' },
+    steps:[
+      { s:'Diseñá un cubo de 40×40×40mm en Tinkercad. Exportá el STL.' },
+      { s:'En Bambu Studio: cargá el STL 3 veces (3 copias). Asigná a cada una un patrón diferente: gyroid, honeycomb y lightning. Todas al 20% de infill.' },
+      { s:'Slice: anotá para cada cubo el tiempo estimado y el peso de material (gramos).' },
+      { s:'Imprimí los 3 cubos.' },
+      { s:'Compará a simple vista cortando uno de cada tipo con un cuchillo (pedí ayuda si hace falta).' },
+      { s:'Opcional: pesá los 3 cubos en una balanza. ¿Hay diferencia a pesar de usar el mismo 20%?' }
+    ],
+    reflexion:[
+      '¿Por qué el mismo porcentaje de infill puede dar diferentes pesos?',
+      '¿Cuándo elegirías lightning? ¿Cuándo elegirías gyroid?'
+    ],
+    tips:[
+      'En Bambu Studio, el patrón de relleno no está en la pantalla principal — buscalo en "Advanced settings".',
+      'Gyroid es el más versátil: si no sabés cuál elegir, elegí gyroid.',
+      'Lightning puede ahorrar 15-25% de material en piezas decorativas.',
+    ]
+  },
+  {
+    num:9, mod:3, type:'opt', dur:'45 min', diff:2,
+    name:'Multi-color: cambio de filamento en una capa específica',
+    objetivo:'Usar la función de pausa/cambio de filamento de la Bambu A1 para crear un objeto con dos colores en capas diferenciadas.',
+    conceptos:[
+      { t:'Cambio de filamento manual', d:'Pausar la impresión en una capa específica para cambiar el color o material.' },
+      { t:'AMS (Automatic Material System)', d:'Sistema de la Bambu A1 que cambia filamentos automáticamente. Hasta 4 colores sin intervención.' }
+    ],
+    needs:[
+      { icon:'🖨️', text:'Bambu Lab A1 + 2 rollos de PLA de colores diferentes' },
+      { icon:'💻', text:'Bambu Studio' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA (2 colores)', infill:'15%', soportes:'No', extra:'La división de color queda en la capa que elijas en Bambu Studio' },
+    steps:[
+      { s:'Diseñá un objeto simple en Tinkercad (una placa 80×40×15mm, o un cubo con texto en relieve).' },
+      { s:'En Bambu Studio: slice el objeto. Usá el <strong>slider de capas</strong> para decidir en qué capa querés el cambio de color.' },
+      { s:'Menú → <strong>Add Color Change</strong> → elegí la capa exacta.' },
+      { s:'Si tenés AMS: asignale un color diferente a cada filamento en Bambu Studio. El cambio es automático.' },
+      { s:'Si no tenés AMS: la impresora va a pausar sola en esa capa y esperar que cambies el filamento manualmente.' },
+      { s:'Imprimí. Si es manual, estate cerca para el cambio. La pausa dura solo unos segundos.' }
+    ],
+    reflexion:[
+      '¿Cómo harías un texto en un color distinto al fondo del objeto?',
+      '¿Qué objetos se beneficiarían de tener múltiples colores en capas?'
+    ],
+    tips:[
+      'El AMS de la A1 es una de sus mejores funciones — usalo si está disponible.',
+      'Para que el texto quede en un color diferente al fondo, el cambio debe ocurrir antes de que empiece el relieve del texto.',
+      'Bambu Studio muestra el preview en colores exactamente como va a quedar impreso — revisalo antes de imprimir.'
+    ]
+  },
+
+  /* ─── MÓDULO 4 ─────────────────────────────────── */
+  {
+    num:10, mod:4, type:'func', dur:'60 min', diff:5,
+    name:'Una bisagra impresa en una sola pieza',
+    objetivo:'Diseñar e imprimir una bisagra funcional que se mueva sin necesidad de ensamble posterior, usando el concepto de clearance en piezas móviles.',
+    conceptos:[
+      { t:'Pieza impresa en un solo trabajo', d:'Una sola impresión que produce algo que ya se mueve al salir de la impresora.' },
+      { t:'Clearance en piezas móviles', d:'El espacio mínimo entre dos partes móviles para que se muevan sin fricción excesiva. Para PLA: 0.3mm–0.5mm.' }
+    ],
+    needs:[
+      { icon:'💻', text:'Tinkercad' },
+      { icon:'🖨️', text:'Bambu Lab A1 + PLA' }
+    ],
+    bambu:{ perfil:'0.10mm Fine', filamento:'PLA', infill:'40%', soportes:'Sí (solo bajo el eje)', extra:'Imprimir con la bisagra en posición abierta (eje horizontal)' },
+    steps:[
+      { s:'<strong>Panel A:</strong> Caja 50×20×5mm con 2 orejetas en un extremo: cilindros de 8mm diámetro × 6mm alto. Las orejetas deben estar separadas entre sí dejando un hueco de 8.6mm.' },
+      { s:'<strong>Panel B:</strong> Caja 50×20×5mm con 1 orejeta central: cilindro de 8mm diámetro × 8mm alto. Este panel encaja en el hueco del Panel A.' },
+      { s:'<strong>El eje:</strong> Cilindro de <strong>7.4mm diámetro</strong> × 22mm largo (8mm - 0.3mm clearance por lado). Debe pasar por los 3 agujeros de las orejetas.' },
+      { s:'Perforá las 3 orejetas con un hole cilíndrico de <strong>7.4mm</strong> (diámetro del eje + 0.3mm clearance).' },
+      { s:'Armá la bisagra: A + B con las orejetas entrelazadas + eje pasando por todo. En Tinkercad se ve armada — exportá así.' },
+      { s:'En Bambu Studio: orientá con el eje horizontal. Activá soportes automáticos (solo para el eje). Imprimir a 0.10mm para mayor detalle.' },
+      { s:'Al terminar: retirá los soportes del eje y probá el movimiento. ¿La bisagra se mueve?' }
+    ],
+    reflexion:[
+      '¿Por qué el eje mide 7.4mm si los agujeros miden 7.4mm? ¿No deberían ser iguales?',
+      '¿Qué pasaría si imprimís la bisagra cerrada (eje vertical) en vez de abierta?'
+    ],
+    tips:[
+      '0.10mm Fine da el mejor acabado para las superficies que rozan. Vale la pena el tiempo extra.',
+      'Si la bisagra queda muy dura, lijá el eje levemente con lija 400.',
+      'Imprimí primero solo las orejetas como prueba de tolerancia antes de hacer el diseño completo.',
+      extra_alert:'⚠️ Este es el diseño más complejo hasta ahora. Si la primera versión no mueve, ajustá el clearance a 0.4mm y reimprimí.'
+    ]
+  },
+  {
+    num:11, mod:4, type:'func', dur:'60 min', diff:4,
+    name:'Organizador modular con compartimentos intercambiables',
+    objetivo:'Diseñar un sistema de escritorio compuesto por una base y 4 compartimentos que se pueden reorganizar según la necesidad.',
+    conceptos:[
+      { t:'Diseño de sistema', d:'Planificar múltiples piezas que funcionan juntas como un todo coherente.' },
+      { t:'Grilla de base', d:'Una base con ranuras o postes que permiten ubicar los compartimentos en distintas posiciones.' }
+    ],
+    needs:[
+      { icon:'💻', text:'Tinkercad' },
+      { icon:'🖨️', text:'Bambu Lab A1 + PLA (varios colores si es posible)' },
+      { icon:'📏', text:'Regla para diseñar la grilla' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA', infill:'20%', soportes:'No', extra:'Imprimí la base sola primero, luego los compartimentos' },
+    steps:[
+      { s:'<strong>Diseñar la base:</strong> Plato rectangular 160×120×5mm. Agregá postes de 5mm diámetro × 8mm alto en grilla cada 40mm (posiciones fijas para los compartimentos).' },
+      { s:'<strong>Conector estándar:</strong> Cada compartimento tiene un hueco de 5.4mm en su base (poste + 0.2mm clearance).' },
+      { s:'<strong>Compartimento 1:</strong> Caja 38×38×40mm con fondo de 3mm de grosor y 4 huecos en las esquinas de la base.' },
+      { s:'<strong>Compartimento 2:</strong> Cilindro para lápices: 38mm diámetro × 60mm alto, interior de 32mm diámetro.' },
+      { s:'<strong>Compartimento 3:</strong> Caja baja para clips: 38×38×15mm.' },
+      { s:'<strong>Compartimento 4:</strong> Libre — que el estudiante elija qué necesita guardar.' },
+      { s:'Imprimí la base. Imprimí los 4 compartimentos. Probá distintas configuraciones en la base.' }
+    ],
+    reflexion:[
+      '¿Qué pasa si uno de los postes de la base se rompe? ¿El sistema sigue funcionando?',
+      '¿Cómo harías para que el sistema pueda crecer? (agregar más postes, bases que se unan entre sí...)'
+    ],
+    tips:[
+      'Imprimí la base primero y probá que los compartimentos encajan antes de imprimir los 4.',
+      'Compartimentos de colores diferentes hacen el sistema más visual y fácil de usar.',
+      'Un clearance de 0.2mm en los postes da ajuste firme pero desmontable — perfecto para este uso.'
+    ]
+  },
+  {
+    num:12, mod:4, type:'func', dur:'60 min', diff:4,
+    name:'Soporte a medida para un dispositivo tuyo',
+    objetivo:'Medir un dispositivo real (celular, tablet, auriculares, etc.) y diseñar un soporte que lo sostenga perfectamente.',
+    conceptos:[
+      { t:'Diseño centrado en el objeto', d:'Las medidas del soporte se derivan de las medidas del dispositivo real, no al revés.' },
+      { t:'Tolerancia de uso', d:'El soporte debe sujetar sin dañar el dispositivo. Clearance típico: 0.5mm–1mm por lado.' }
+    ],
+    needs:[
+      { icon:'📏', text:'Calibre o regla para medir el dispositivo' },
+      { icon:'📱', text:'El dispositivo real que vas a soportar' },
+      { icon:'💻', text:'Tinkercad' },
+      { icon:'🖨️', text:'Bambu Lab A1 + PLA' }
+    ],
+    bambu:{ perfil:'0.20mm Standard', filamento:'PLA', infill:'25%', soportes:'Depende del diseño', extra:'Infill 25% para mayor estabilidad del soporte' },
+    steps:[
+      { s:'Medí tu dispositivo: ancho, alto, grosor. Anotá si tiene bordes curvos.' },
+      { s:'Definí el tipo de soporte: ¿lateral (de pie)? ¿horizontal? ¿con ángulo? ¿Dónde va a estar: escritorio, estante, pared?' },
+      { s:'Diseñá la ranura donde va el dispositivo: ancho del dispositivo + 1mm de clearance, grosor + 1mm.' },
+      { s:'Diseñá la estructura que sostiene la ranura: base sólida o pata trasera con ángulo (ej: 70° de inclinación).' },
+      { s:'Verificá en Tinkercad que el diseño es estable: ¿no se cae para adelante con el peso del dispositivo?' },
+      { s:'Exportá STL → Bambu Studio → analizá la orientación óptima para que las capas aguanten el peso → Print.' },
+      { s:'Probá con el dispositivo real. ¿Sujeta bien? ¿Hay algo que ajustar?' }
+    ],
+    reflexion:[
+      '¿Cómo harías el soporte para que también funcione con otro modelo de celular?',
+      '¿En qué orientación de impresión es más resistente el soporte? ¿Por qué?'
+    ],
+    tips:[
+      '1mm de clearance es suficiente para que el dispositivo entre y salga fácil sin quedar suelto.',
+      'Si el dispositivo tiene bordes redondeados, simplificalos en Tinkercad con un borde recto.',
+      'Un ángulo de 70-75° es ideal para ver la pantalla sin que el dispositivo se caiga.'
+    ]
+  },
+
+  /* ─── MÓDULO 5 ─────────────────────────────────── */
+  {
+    num:13, mod:5, type:'eng', dur:'45 min', diff:3,
+    name:'Definir el problema + boceto técnico con cotas',
+    objetivo:'Elegir un problema real del entorno, definir los requisitos de la solución y producir un boceto técnico con cotas antes de diseñar en Tinkercad.',
+    conceptos:[
+      { t:'Brief de diseño', d:'Documento que describe el problema, los usuarios, los requisitos y las restricciones de una solución.' },
+      { t:'Requisito funcional', d:'Algo que la pieza DEBE hacer. Ej: "soportar al menos 200g sin doblarse".' },
+      { t:'Restricción', d:'Límite que no podés ignorar. Ej: "debe caber en la bandeja de 20cm".' }
+    ],
+    needs:[
+      { icon:'📄', text:'Papel cuadriculado y lápiz' },
+      { icon:'📏', text:'Regla para medir el entorno' }
+    ],
+    bambu:null,
+    steps:[
+      { s:'Caminá por tu cuarto o cocina buscando algo que podría estar mejor organizado, soportado o mejorado. Encontrá 3 opciones.' },
+      { s:'Para cada opción: ¿Quién lo usa? ¿Cuál es el problema exacto? ¿Qué pasaría si lo resolvés?' },
+      { s:'Elegí la mejor opción. Escribí el <strong>Brief</strong>: Problema / Usuarios / Requisitos / Restricciones.' },
+      { s:'Boceto técnico: dibujá la solución desde 3 vistas con cotas. No tiene que ser perfecto.' },
+      { s:'Lista de piezas: ¿Cuántas partes tiene? ¿Se imprimen juntas o separadas? ¿Necesita soportes?' },
+      { s:'Análisis de impresión: ¿cuánto tiempo estimás? ¿cuánto filamento? ¿qué configuración vas a usar?' }
+    ],
+    reflexion:[
+      '¿Qué hace que tu solución sea mejor que algo que podrías comprar en un negocio?',
+      '¿Qué es lo que más riesgo tiene en tu diseño? ¿Cómo lo vas a manejar?'
+    ],
+    tips:[
+      'Los mejores proyectos son los más simples: un solo problema bien resuelto supera a algo complejo a medias.',
+      'Limitá el proyecto a lo que podés imprimir en 1-2 horas — la ambición es buena, el scope realista también.',
+      'El boceto técnico es el contrato contigo mismo — si cambiás algo, actualizá el boceto.'
+    ]
+  },
+  {
+    num:14, mod:5, type:'eng', dur:'60 min', diff:5,
+    name:'Diseñar en Tinkercad y planificar la impresión óptima',
+    objetivo:'Construir el diseño del Brief en Tinkercad aplicando todo lo aprendido, y configurar la impresión óptima en Bambu Studio.',
+    conceptos:[
+      { t:'Iteración de diseño', d:'Hacer varias versiones hasta llegar a la mejor solución. V1, V2, V3...' }
+    ],
+    needs:[
+      { icon:'📄', text:'Brief y boceto de la Clase 13' },
+      { icon:'💻', text:'Tinkercad + Bambu Studio' },
+      { icon:'📏', text:'Regla o calibre para verificar medidas en el entorno' }
+    ],
+    bambu:{ perfil:'A definir según el diseño', filamento:'PLA', infill:'A definir', soportes:'Depende del diseño', extra:'No se imprime en esta clase — solo se diseña y analiza' },
+    steps:[
+      { s:'Abrí Tinkercad con el <strong>boceto visible al lado</strong> en todo momento.' },
+      { s:'Empezá por la forma más grande. Construí de grande a pequeño, de estructura a detalle.' },
+      { s:'Aplicá tolerancias donde corresponda: encastres, soportes, agujeros para piezas reales.' },
+      { s:'Cada 15 min: pausá, mirá el diseño desde afuera. ¿Se parece al boceto? ¿Cumple los requisitos?' },
+      { s:'Exportá el STL y abrí en Bambu Studio. Analizá: ¿qué orientación es la mejor? ¿Necesita soportes? ¿Qué infill?' },
+      { s:'Configurá la impresión y anotá la configuración elegida + justificación de cada elección.' },
+      { s:'Guardá el STL con nombre: "proyecto-v1.stl". Estás listo para la Clase 15.' }
+    ],
+    reflexion:[
+      '¿Qué aspecto del diseño cambiarías si tuvieras que hacer una v2?',
+      '¿La configuración de impresión que elegiste prioriza velocidad, calidad o resistencia?'
+    ],
+    tips:[
+      'Guardá versiones diferentes (v1, v2) — si algo no funciona, podés volver atrás.',
+      'Normal que el diseño cambie durante el proceso. Iterar es parte del trabajo real de ingeniería.',
+      'Revisá siempre en Bambu Studio antes de imprimir — el preview muestra problemas que Tinkercad no muestra.'
+    ]
+  },
+  {
+    num:15, mod:5, type:'eng', dur:'60 min + impresión', diff:3,
+    name:'Imprimir, probar y presentar el proceso técnico',
+    objetivo:'Imprimir el proyecto final, probarlo contra los requisitos del Brief, y presentar en 5 minutos el proceso técnico completo.',
+    conceptos:[
+      { t:'Verificación', d:'Comprobar que la solución cumple todos los requisitos definidos en el Brief.' },
+      { t:'Documentación técnica', d:'Registro del proceso: qué se hizo, qué falló, cómo se mejoró.' }
+    ],
+    needs:[
+      { icon:'📁', text:'STL de la Clase 14' },
+      { icon:'🖨️', text:'Bambu Lab A1 + filamento PLA' },
+      { icon:'📸', text:'Celular para documentar el proceso (fotos y video)' },
+      { icon:'📄', text:'El Brief original de la Clase 13' }
+    ],
+    bambu:{ perfil:'Según configuración de Clase 14', filamento:'PLA', infill:'Según configuración de Clase 14', soportes:'Según configuración de Clase 14', extra:'Decidir la configuración final junto al estudiante — justificar cada elección' },
+    steps:[
+      { s:'Revisá el STL una última vez en Bambu Studio. ¿La configuración sigue siendo la correcta?' },
+      { s:'Print! Sacá fotos y video del inicio de la impresión y del progreso.' },
+      { s:'Mientras se imprime, preparar la <strong>presentación técnica</strong> (5 min):\n 1. ¿Cuál era el problema? / 2. ¿Cómo funciona la solución? / 3. ¿Qué técnicas de ingeniería usaste? / 4. ¿Qué cambiarías en una v2?' },
+      { s:'Cuando termine: retirá soportes si los hay. Probá el objeto contra cada requisito del Brief. ¿Cumple todos?' },
+      { s:'Si algo no funciona: anotá qué falló y cómo lo corregirías. Eso también es ingeniería.' },
+      { s:'Presentación a la familia o en grupo: mostrá el objeto, explicá el proceso, mostrá el Brief.' }
+    ],
+    reflexion:[
+      '¿Qué fue lo más difícil de todo el proyecto? ¿Qué aprendiste de eso?',
+      '¿Si tuvieras que hacer la v2, cuál sería el cambio más importante?'
+    ],
+    tips:[
+      'La presentación de 5 minutos vale tanto como el objeto — practicala una vez antes.',
+      'Si el objeto no quedó perfecto, está bien. Lo importante es documentar por qué y cómo mejorar.',
+      'Guardá el STL final, el Brief y las fotos — son tu portafolio de ingeniería 3D.'
+    ]
+  }
+];
+
+const MODS = [
+  { num:0, label:'Todas', color:'#6366f1' },
+  { num:1, label:'M1 · Inv. Inversa', color:'#0f766e' },
+  { num:2, label:'M2 · Tolerancias', color:'#1d4ed8' },
+  { num:3, label:'M3 · Optimización', color:'#b45309' },
+  { num:4, label:'M4 · Funcionales', color:'#7c3aed' },
+  { num:5, label:'M5 · Ingeniería', color:'#be123c' }
+];
+
+const TYPE = {
+  inv:  { label:'🔍 Ing. Inversa', cls:'b-inv' },
+  tol:  { label:'📏 Tolerancias', cls:'b-tol' },
+  opt:  { label:'⚡ Optimización', cls:'b-opt' },
+  func: { label:'🔩 Funcional', cls:'b-func' },
+  eng:  { label:'🚀 Ingeniería', cls:'b-eng' }
+};
+
+function stars(n) { return '★'.repeat(n) + '☆'.repeat(5-n); }
+let activeFilter = 0, openClass = null;
+
+function renderFilter() {
+  document.getElementById('mod-filter').innerHTML = MODS.map(m => `
+    <button class="mod-btn${m.num===activeFilter?' active':''}"
+      style="${m.num===activeFilter?`background:${m.color}`:''}"
+      onclick="setFilter(${m.num})">${m.label}</button>`).join('');
+}
+
+function setFilter(n) { activeFilter = n; renderFilter(); renderList(); }
+
+function toggleClass(num) {
+  openClass = openClass === num ? null : num;
+  document.querySelectorAll('.cls-wrap').forEach(el => {
+    el.classList.toggle('open', parseInt(el.dataset.cls) === openClass);
+  });
+  if (openClass !== null) {
+    const el = document.querySelector(`[data-cls="${openClass}"]`);
+    if (el) setTimeout(() => el.scrollIntoView({behavior:'smooth', block:'nearest'}), 50);
+  }
+}
+
+function renderList() {
+  const filtered = activeFilter === 0 ? CLASSES : CLASSES.filter(c => c.mod === activeFilter);
+  const color = mod => MOD_COLORS[mod-1];
+
+  document.getElementById('class-list').innerHTML = filtered.map(c => {
+    const t = TYPE[c.type];
+    return `
+    <div class="cls-wrap${c.num===openClass?' open':''}" data-cls="${c.num}">
+      <div class="cls-header" onclick="toggleClass(${c.num})">
+        <div class="cls-num-badge" style="background:${color(c.mod)}">C${c.num}</div>
+        <div class="cls-hinfo">
+          <div class="cls-htitle">${c.name}</div>
+          <div class="cls-hmeta">
+            <span class="badge ${t.cls}">${t.label}</span>
+            <span class="cls-dur">⏱️ ${c.dur}</span>
+            <span class="cls-diff">${stars(c.diff)}</span>
+          </div>
+        </div>
+        <span class="cls-chevron">›</span>
+      </div>
+      <div class="cls-guide">
+
+        <div class="guide-section">
+          <div class="gs-title">🎯 Objetivo</div>
+          <div class="objetivo-text">${c.objetivo}</div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title">💡 Conceptos clave</div>
+          <div class="conceptos">
+            ${c.conceptos.map(cv => `
+              <div class="concepto">
+                <div class="concepto-term">${cv.t}</div>
+                <div class="concepto-def">${cv.d}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title">🛠️ Necesitás</div>
+          <div class="needs-list">
+            ${c.needs.map(n => `
+              <div class="need-item"><span class="need-icon">${n.icon}</span><span>${n.text}</span></div>`).join('')}
+          </div>
+        </div>
+
+        ${c.bambu ? `
+        <div class="guide-section">
+          <div class="gs-title">⚙️ Configuración Bambu Lab A1</div>
+          <div class="bambu-grid">
+            <div class="bambu-item"><div class="bambu-label">Perfil</div><div class="bambu-val">${c.bambu.perfil}</div></div>
+            <div class="bambu-item"><div class="bambu-label">Filamento</div><div class="bambu-val">${c.bambu.filamento}</div></div>
+            <div class="bambu-item"><div class="bambu-label">Infill</div><div class="bambu-val">${c.bambu.infill}</div></div>
+            <div class="bambu-item"><div class="bambu-label">Soportes</div><div class="bambu-val">${c.bambu.soportes}</div></div>
+            ${c.bambu.extra ? `<div class="bambu-item" style="grid-column:1/-1"><div class="bambu-label">Nota</div><div class="bambu-val">${c.bambu.extra}</div></div>` : ''}
+          </div>
+        </div>` : ''}
+
+        <div class="guide-section">
+          <div class="gs-title">📋 Pasos</div>
+          <div class="steps-list">
+            ${c.steps.filter(s => typeof s === 'object' && s.s).map((s,i) => `
+              <div class="step">
+                <div class="step-num" style="background:${color(c.mod)}">${i+1}</div>
+                <div class="step-text">${s.s}</div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title">🤔 Para pensar</div>
+          <div class="reflexion-list">
+            ${c.reflexion.map(r => `
+              <div class="reflexion"><span class="ref-icon">💭</span><span class="ref-text">${r}</span></div>`).join('')}
+          </div>
+        </div>
+
+        <div class="guide-section">
+          <div class="gs-title">💡 Tips</div>
+          <div class="tips-list">
+            ${c.tips.filter(tip => typeof tip === 'string').map(tip => `
+              <div class="tip"><span class="tip-icon">💡</span><span class="tip-text">${tip}</span></div>`).join('')}
+          </div>
+        </div>
+
+      </div>
+    </div>`;
+  }).join('');
+}
+
+renderFilter();
+renderList();
+</script>
+</body>
+</html>

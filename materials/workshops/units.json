@@ -2,13 +2,14 @@
   {
     "subject": "workshops",
     "type": "sessions",
-    "grade": "2do",
+    "grade": "5to",
     "unit": "1",
-    "name": "Studio 3D — Manual de Mateo",
+    "name": "Studio 3D — Avanzado",
+    "level": "avanzado",
     "activeVersion": "v1",
     "versions": ["v1"],
     "materials": ["project", "guide", "quiz"],
-    "emoji": "🖨️"
+    "emoji": "⚙️"
   },
   {
     "subject": "workshops",

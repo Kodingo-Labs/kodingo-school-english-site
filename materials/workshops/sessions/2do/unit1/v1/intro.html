@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Intro Studio 3D — Mateo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #f1f5f9;
+      background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+      background-size: 22px 22px;
+      min-height: 100vh;
+      padding: 28px 16px 64px;
+      color: #1e293b;
+    }
+
+    .header { text-align: center; margin-bottom: 24px; }
+    .header .icon { font-size: 3.5rem; display: block; margin-bottom: 8px; }
+    .header h1 { font-size: 1.9rem; font-weight: 900; }
+    .header .sub { color: #64748b; font-size: 0.9rem; margin-top: 5px; font-weight: 600; }
+
+    .steps-indicator {
+      display: flex; justify-content: center; gap: 8px;
+      max-width: 580px; margin: 0 auto 22px;
+    }
+    .s-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #e2e8f0; transition: all .3s;
+    }
+    .s-dot.done { background: #4f46e5; }
+    .s-dot.active { background: #7c3aed; transform: scale(1.35); }
+
+    .step { display: none; }
+    .step.active { display: block; }
+
+    .card {
+      background: white; border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+      padding: 28px; max-width: 580px; margin: 0 auto;
+      animation: fadeUp .3s ease;
+    }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    .big-emoji { font-size: 4.5rem; text-align: center; display: block; margin-bottom: 14px; }
+    .card-title { font-size: 1.5rem; font-weight: 900; text-align: center; margin-bottom: 6px; }
+    .card-sub { color: #64748b; text-align: center; font-size: 0.88rem; font-weight: 600; margin-bottom: 22px; }
+
+    .info-block {
+      background: #f8fafc; border-radius: 14px; padding: 15px 18px;
+      margin-bottom: 12px; border-left: 4px solid #4f46e5;
+    }
+    .ib-icon { font-size: 1.4rem; margin-bottom: 6px; display: block; }
+    .info-block p { font-size: 0.93rem; font-weight: 700; color: #334155; line-height: 1.6; }
+    .info-block strong { color: #1e293b; }
+
+    /* Layer animation */
+    .layer-wrap { margin: 20px auto; width: fit-content; }
+    .layer-label { text-align: center; font-size: 0.75rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px; }
+    .layer-stack { display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; }
+    .layer {
+      height: 13px; border-radius: 5px;
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      opacity: 0; transform: scaleX(0); transform-origin: left;
+      animation: layerIn .35s ease forwards;
+    }
+    @keyframes layerIn { to { opacity: 1; transform: scaleX(1); } }
+    .layer-arrow { text-align: center; font-size: 1.5rem; margin-top: 10px; }
+
+    /* Module list */
+    .mod-list { display: flex; flex-direction: column; gap: 9px; margin-top: 16px; }
+    .mod-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-radius: 13px; border: 2px solid;
+    }
+    .mod-icon { font-size: 1.5rem; flex-shrink: 0; }
+    .mod-info { flex: 1; }
+    .mod-name { font-size: 0.9rem; font-weight: 900; }
+    .mod-desc { font-size: 0.73rem; color: #64748b; font-weight: 600; margin-top: 2px; }
+
+    /* Quiz */
+    .quiz-prog { display: flex; gap: 6px; margin-bottom: 18px; }
+    .qp { flex: 1; height: 7px; border-radius: 99px; background: #e2e8f0; transition: background .3s; }
+    .qp.current { background: #4f46e5; }
+    .qp.done { background: #22c55e; }
+
+    .q-num { font-size: 0.73rem; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; color: #94a3b8; margin-bottom: 8px; }
+    .q-text { font-size: 1.05rem; font-weight: 900; color: #1e293b; margin-bottom: 18px; line-height: 1.45; }
+    .q-opts { display: flex; flex-direction: column; gap: 8px; }
+    .q-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 16px; border-radius: 12px;
+      border: 2.5px solid #e2e8f0; background: white;
+      font-family: inherit; font-size: 0.93rem; font-weight: 800;
+      cursor: pointer; text-align: left; color: #1e293b; transition: all .15s;
+    }
+    .q-btn:not(:disabled):hover { border-color: #a5b4fc; background: #eef2ff; }
+    .q-btn:disabled { cursor: default; }
+    .q-letter {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: #f1f5f9; display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem; font-weight: 900; color: #64748b;
+    }
+    .q-btn.correct { border-color: #22c55e; background: #f0fdf4; }
+    .q-btn.correct .q-letter { background: #22c55e; color: white; }
+    .q-btn.wrong { border-color: #ef4444; background: #fef2f2; }
+    .q-btn.wrong .q-letter { background: #ef4444; color: white; }
+    .q-fb {
+      display: none; margin-top: 14px; padding: 12px 14px;
+      border-radius: 10px; font-size: 0.87rem; font-weight: 800; line-height: 1.5;
+    }
+    .q-fb.show { display: block; }
+    .q-fb.ok { background: #f0fdf4; color: #15803d; border: 2px solid #bbf7d0; }
+    .q-fb.bad { background: #fef2f2; color: #dc2626; border: 2px solid #fecaca; }
+    .next-q {
+      display: none; width: 100%; margin-top: 14px;
+      padding: 13px; border-radius: 12px; border: none;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white; font-family: inherit; font-size: 1rem; font-weight: 900; cursor: pointer;
+    }
+    .next-q.show { display: block; }
+
+    /* Celebration */
+    .cel { text-align: center; padding: 12px 0; }
+    .cel-icon { font-size: 5rem; display: block; margin-bottom: 14px; }
+    .cel-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 10px; }
+    .cel-text { color: #64748b; font-size: 0.95rem; font-weight: 700; line-height: 1.7; }
+
+    /* Navigation */
+    .nav {
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 580px; margin: 20px auto 0;
+    }
+    .nav-btn {
+      padding: 12px 28px; border-radius: 99px; border: none;
+      font-family: inherit; font-size: 0.95rem; font-weight: 900;
+      cursor: pointer; transition: all .15s;
+    }
+    .nav-btn.primary {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white; box-shadow: 0 4px 14px rgba(79,70,229,.35);
+    }
+    .nav-btn.primary:hover:not(:disabled) { transform: translateY(-1px); }
+    .nav-btn.secondary { background: white; color: #64748b; border: 2px solid #e2e8f0; }
+    .nav-btn:disabled { opacity: 0.35; cursor: default; }
+
+    footer { text-align: center; margin-top: 40px; color: #94a3b8; font-size: 0.75rem; font-weight: 700; }
+
+    @media (max-width: 480px) {
+      .card { padding: 22px 16px; }
+      .card-title { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <span class="icon">🖨️</span>
+  <h1>Antes de empezar…</h1>
+  <p class="sub">¡Mateo, aprendé qué es la Impresión 3D en 5 minutos!</p>
+</header>
+
+<div class="steps-indicator" id="ind"></div>
+
+<!-- Paso 1: ¿Qué es? -->
+<div class="step active" id="step-1">
+  <div class="card">
+    <span class="big-emoji">🤖</span>
+    <div class="card-title">¿Qué es una Impresora 3D?</div>
+    <div class="card-sub">Una máquina que convierte ideas en objetos reales</div>
+
+    <div class="info-block">
+      <span class="ib-icon">🏗️</span>
+      <p>Es como un <strong>robot constructor</strong>: toma plástico derretido y lo va colocando capa por capa hasta crear un objeto sólido. ¡Como armar Lego, pero automático!</p>
+    </div>
+    <div class="info-block">
+      <span class="ib-icon">🌽</span>
+      <p>El material se llama <strong>PLA</strong> y viene de plantas de maíz. ¡Es ecológico y no daña el planeta!</p>
+    </div>
+    <div class="info-block">
+      <span class="ib-icon">💻</span>
+      <p>Primero <strong>diseñás el objeto en la computadora</strong>, y después la impresora lo construye solo. ¡Vos elegís qué hacer!</p>
+    </div>
+  </div>
+</div>
+
+<!-- Paso 2: ¿Cómo funciona? -->
+<div class="step" id="step-2">
+  <div class="card">
+    <span class="big-emoji">📐</span>
+    <div class="card-title">¿Cómo funciona?</div>
+    <div class="card-sub">Capa por capa, como una torre de panqueques</div>
+
+    <div class="layer-wrap">
+      <div class="layer-label">Así crece un objeto al imprimirse</div>
+      <div class="layer-stack" id="layers"></div>
+      <div class="layer-arrow">⬆️ capa por capa</div>
+    </div>
+
+    <div class="info-block">
+      <span class="ib-icon">🔥</span>
+      <p>La impresora calienta el plástico a <strong>220°C</strong> y lo deposita en capas finísimas. Cada capa mide <strong>0.2mm</strong> — ¡más fina que un cabello!</p>
+    </div>
+    <div class="info-block">
+      <span class="ib-icon">⏱️</span>
+      <p>Un llavero tarda <strong>20 minutos</strong>. Un objeto grande puede tardar horas. La computadora te dice cuánto tiempo va a demorar <em>antes</em> de imprimir.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Paso 3: Qué vamos a hacer -->
+<div class="step" id="step-3">
+  <div class="card">
+    <span class="big-emoji">🚀</span>
+    <div class="card-title">¿Qué vamos a aprender?</div>
+    <div class="card-sub">Studio 3D tiene 5 módulos y 15 clases</div>
+
+    <div class="mod-list">
+      <div class="mod-row" style="border-color:#fed7aa; background:#fff7ed">
+        <span class="mod-icon">🖨️</span>
+        <div class="mod-info">
+          <div class="mod-name" style="color:#ea580c">Módulo 1 — ¡Primero Imprimimos!</div>
+          <div class="mod-desc">Conocer la impresora e imprimir objetos de internet</div>
+        </div>
+      </div>
+      <div class="mod-row" style="border-color:#bfdbfe; background:#eff6ff">
+        <span class="mod-icon">✏️</span>
+        <div class="mod-info">
+          <div class="mod-name" style="color:#2563eb">Módulo 2 — ¡Mis Primeros Diseños!</div>
+          <div class="mod-desc">Aprender Tinkercad: crear tus propias formas</div>
+        </div>
+      </div>
+      <div class="mod-row" style="border-color:#e9d5ff; background:#faf5ff">
+        <span class="mod-icon">🔤</span>
+        <div class="mod-info">
+          <div class="mod-name" style="color:#9333ea">Módulo 3 — Texto y Personalización</div>
+          <div class="mod-desc">Poner tu nombre y crear objetos únicos</div>
+        </div>
+      </div>
+      <div class="mod-row" style="border-color:#bbf7d0; background:#f0fdf4">
+        <span class="mod-icon">🎨</span>
+        <div class="mod-info">
+          <div class="mod-name" style="color:#16a34a">Módulo 4 — Proyectos Creativos</div>
+          <div class="mod-desc">Cajas, macetas, fichas de juego y más</div>
+        </div>
+      </div>
+      <div class="mod-row" style="border-color:#fde68a; background:#fffbeb">
+        <span class="mod-icon">🏆</span>
+        <div class="mod-info">
+          <div class="mod-name" style="color:#d97706">Módulo 5 — Mi Proyecto Final</div>
+          <div class="mod-desc">Elegir, diseñar e imprimir tu propio invento</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Paso 4: Quiz -->
+<div class="step" id="step-4">
+  <div class="card">
+    <span class="big-emoji">🧠</span>
+    <div class="card-title">¡Vamos a ver qué aprendiste!</div>
+    <div class="card-sub">4 preguntas rápidas — sin presión, ¡vos podés!</div>
+
+    <div class="quiz-prog" id="qprog"></div>
+    <div id="qzone">
+      <div class="q-num" id="qnum"></div>
+      <div class="q-text" id="qtext"></div>
+      <div class="q-opts" id="qopts"></div>
+      <div class="q-fb" id="qfb"></div>
+      <button class="next-q" id="nextq" onclick="nextQ()">Siguiente →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Paso 5: Celebración -->
+<div class="step" id="step-5">
+  <div class="card">
+    <div class="cel">
+      <span class="cel-icon">🎉</span>
+      <div class="cel-title">¡Listo, Mateo!</div>
+      <p class="cel-text">
+        Ya sabés qué es una impresora 3D y cómo funciona capa por capa.<br><br>
+        Ahora sí… <strong>¡empezá la Clase 1 y hacé tu primer objeto real!</strong> 🚀
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="nav" id="nav">
+  <button class="nav-btn secondary" id="prevBtn" onclick="move(-1)" disabled>← Atrás</button>
+  <button class="nav-btn primary"  id="nextBtn" onclick="move(1)">Siguiente →</button>
+</div>
+
+<footer>Studio 3D — Manual de Mateo · Kodingo School</footer>
+
+<script>
+const TOTAL = 5;
+let cur = 1;
+let qCur = 0;
+let qAnswered = false;
+let qDone = false;
+
+const Qs = [
+  {
+    q: '¿Qué es lo PRIMERO que hacemos antes de imprimir algo?',
+    opts: ['Encender la impresora', 'Diseñarlo en la computadora', 'Elegir el color'],
+    ok: 1, fb_ok: '¡Exacto! Primero diseñamos, después imprimimos.', fb_bad: 'No del todo. Lo primero es diseñar el objeto en la computadora.'
+  },
+  {
+    q: '¿De qué está hecho el filamento PLA?',
+    opts: ['Metal fundido', 'Plantas de maíz 🌽', 'Agua congelada'],
+    ok: 1, fb_ok: '¡Sí! El PLA viene de plantas de maíz, por eso es ecológico.', fb_bad: 'No. El PLA está hecho de plantas de maíz, ¡es especial!'
+  },
+  {
+    q: '¿Cómo construye objetos la impresora 3D?',
+    opts: ['De un solo golpe', 'Capa por capa', 'De afuera hacia adentro'],
+    ok: 1, fb_ok: '¡Correcto! Capa por capa, como apilar panqueques muy finos.', fb_bad: 'No. La impresora construye capa por capa, como una torre de panqueques.'
+  },
+  {
+    q: '¿Cuántos módulos tiene Studio 3D?',
+    opts: ['3 módulos', '5 módulos 🖐️', '10 módulos'],
+    ok: 1, fb_ok: '¡Perfecto! 5 módulos con 3 clases cada uno = 15 clases en total.', fb_bad: 'Casi. Studio 3D tiene 5 módulos y 15 clases en total.'
+  }
+];
+
+function buildInd() {
+  document.getElementById('ind').innerHTML = Array.from({length: TOTAL}, (_, i) =>
+    `<div class="s-dot ${i+1<cur?'done':i+1===cur?'active':''}"></div>`
+  ).join('');
+}
+
+function buildLayers() {
+  const widths = [200,185,195,175,190,178,168,183,162,178];
+  document.getElementById('layers').innerHTML = widths.map((w,i) =>
+    `<div class="layer" style="width:${w}px; animation-delay:${i*0.09}s"></div>`
+  ).join('');
+}
+
+function buildQProg() {
+  document.getElementById('qprog').innerHTML = Qs.map((_,i) =>
+    `<div class="qp ${i<qCur?'done':i===qCur?'current':''}"></div>`
+  ).join('');
+}
+
+function renderQ() {
+  if (qCur >= Qs.length) {
+    qDone = true;
+    document.getElementById('nextBtn').disabled = false;
+    document.getElementById('nextBtn').textContent = '¡Terminé! 🎉';
+    document.getElementById('qzone').innerHTML = `
+      <div style="text-align:center;padding:16px 0">
+        <span style="font-size:3rem">🌟</span>
+        <div style="font-size:1.15rem;font-weight:900;margin-top:12px;color:#1e293b">¡Respondiste todo!</div>
+        <div style="color:#64748b;font-weight:700;margin-top:6px">Ya conocés los conceptos básicos del Studio 3D.</div>
+      </div>`;
+    return;
+  }
+  const q = Qs[qCur];
+  document.getElementById('qnum').textContent = `Pregunta ${qCur+1} de ${Qs.length}`;
+  document.getElementById('qtext').textContent = q.q;
+  const fb = document.getElementById('qfb');
+  fb.className = 'q-fb'; fb.textContent = '';
+  document.getElementById('nextq').classList.remove('show');
+  qAnswered = false;
+  document.getElementById('qopts').innerHTML = q.opts.map((opt,i) => `
+    <button class="q-btn" onclick="answerQ(${i})" id="qo${i}">
+      <span class="q-letter">${['A','B','C'][i]}</span>${opt}
+    </button>`).join('');
+  buildQProg();
+}
+
+function answerQ(idx) {
+  if (qAnswered) return;
+  qAnswered = true;
+  const q = Qs[qCur];
+  const isOk = idx === q.ok;
+  document.querySelectorAll('.q-btn').forEach((b,i) => {
+    b.disabled = true;
+    if (i === q.ok) b.classList.add('correct');
+    else if (i === idx && !isOk) b.classList.add('wrong');
+  });
+  const fb = document.getElementById('qfb');
+  fb.textContent = (isOk ? '✅ ' : '❌ ') + (isOk ? q.fb_ok : q.fb_bad);
+  fb.className = `q-fb show ${isOk?'ok':'bad'}`;
+  document.getElementById('nextq').classList.add('show');
+}
+
+function nextQ() { qCur++; renderQ(); }
+
+function move(dir) {
+  if (dir === 1 && cur === 4 && !qDone) return;
+  cur = Math.max(1, Math.min(TOTAL, cur + dir));
+  document.querySelectorAll('.step').forEach((s,i) => s.classList.toggle('active', i+1 === cur));
+  const prev = document.getElementById('prevBtn');
+  const next = document.getElementById('nextBtn');
+  prev.disabled = cur === 1;
+  if (cur === TOTAL) {
+    next.textContent = '¡Empezar Clase 1! 🚀';
+    next.disabled = false;
+  } else if (cur === 4) {
+    next.textContent = '¡Terminé! 🎉';
+    next.disabled = !qDone;
+  } else {
+    next.textContent = 'Siguiente →';
+    next.disabled = false;
+  }
+  buildInd();
+  if (cur === 2) buildLayers();
+  if (cur === 4 && !qDone) renderQ();
+}
+
+buildInd();
+</script>
+</body>
+</html>

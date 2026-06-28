@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiz Ingeniería 3D — 5to Grado</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: #0f172a;
+      background-image: radial-gradient(rgba(148,163,184,.12) 1px, transparent 1px);
+      background-size: 24px 24px;
+      min-height: 100vh;
+      padding: 28px 16px 64px;
+      color: #e2e8f0;
+      display: flex; flex-direction: column; align-items: center;
+    }
+
+    .header { text-align: center; margin-bottom: 28px; }
+    .header .icon { font-size: 3rem; display: block; margin-bottom: 8px; }
+    .header h1 { font-size: 1.75rem; font-weight: 900; color: #f1f5f9; }
+    .header .sub { color: #475569; font-size: 0.86rem; margin-top: 5px; font-weight: 600; }
+
+    .card {
+      background: #1e293b; border-radius: 20px;
+      border: 1px solid #334155;
+      box-shadow: 0 4px 24px rgba(0,0,0,.3);
+      padding: 28px 28px 24px;
+      width: 100%; max-width: 600px;
+    }
+
+    /* Progress */
+    .prog-bar-wrap { margin-bottom: 22px; }
+    .prog-labels {
+      display: flex; justify-content: space-between;
+      font-size: 0.76rem; font-weight: 800; color: #475569; margin-bottom: 8px;
+    }
+    .prog-labels .current { color: #818cf8; }
+    .prog-bg { height: 8px; background: #334155; border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: linear-gradient(90deg, #6366f1, #8b5cf6); border-radius: 99px; transition: width .4s ease; }
+
+    /* Question */
+    .q-badge {
+      display: inline-block; font-size: 0.62rem; font-weight: 900;
+      text-transform: uppercase; letter-spacing: .8px;
+      padding: 3px 10px; border-radius: 99px; margin-bottom: 10px;
+    }
+    .question-text {
+      font-size: 1.08rem; font-weight: 900; color: #f1f5f9;
+      line-height: 1.45; margin-bottom: 22px;
+    }
+
+    /* Options */
+    .options { display: flex; flex-direction: column; gap: 9px; }
+    .opt-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 17px; border-radius: 12px;
+      border: 1.5px solid #334155; background: #1a2537;
+      font-family: inherit; font-size: 0.92rem; font-weight: 800;
+      cursor: pointer; text-align: left; color: #94a3b8;
+      transition: all .15s;
+    }
+    .opt-btn:not(:disabled):hover { border-color: #6366f1; background: #1e293b; color: #e2e8f0; }
+    .opt-btn:disabled { cursor: default; }
+
+    .opt-letter {
+      width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+      background: #334155; display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 900; color: #475569;
+    }
+    .opt-btn.correct { border-color: #22c55e; background: rgba(34,197,94,.08); color: #4ade80; }
+    .opt-btn.correct .opt-letter { background: #22c55e; color: white; }
+    .opt-btn.wrong { border-color: #ef4444; background: rgba(239,68,68,.08); color: #f87171; }
+    .opt-btn.wrong .opt-letter { background: #ef4444; color: white; }
+
+    /* Feedback */
+    .feedback {
+      display: none; margin-top: 16px; padding: 12px 15px;
+      border-radius: 10px; font-size: 0.86rem; font-weight: 800; line-height: 1.5;
+    }
+    .feedback.show { display: block; }
+    .feedback.ok  { background: rgba(34,197,94,.1); color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
+    .feedback.bad { background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(239,68,68,.25); }
+
+    .next-btn {
+      display: none; margin-top: 18px; width: 100%;
+      padding: 13px; background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white; border: none; border-radius: 12px;
+      font-family: inherit; font-size: 0.98rem; font-weight: 900;
+      cursor: pointer; transition: transform .1s;
+    }
+    .next-btn.show { display: block; }
+    .next-btn:active { transform: scale(.98); }
+
+    /* Results */
+    .results {
+      display: none; width: 100%; max-width: 600px;
+      background: #1e293b; border-radius: 20px; border: 1px solid #334155;
+      box-shadow: 0 4px 24px rgba(0,0,0,.3);
+      padding: 40px 28px; text-align: center;
+    }
+    .results.show { display: block; }
+    .res-icon { font-size: 4.5rem; display: block; margin-bottom: 12px; }
+    .res-score { font-size: 3rem; font-weight: 900; color: #818cf8; margin-bottom: 4px; }
+    .res-label { font-size: 0.9rem; color: #475569; font-weight: 700; margin-bottom: 18px; }
+    .res-stars { font-size: 2rem; letter-spacing: 3px; margin-bottom: 14px; display: block; }
+    .res-msg { font-size: 1rem; font-weight: 800; color: #94a3b8; line-height: 1.6; margin-bottom: 24px; }
+    .retry-btn {
+      padding: 12px 30px; background: #1a2537;
+      color: #818cf8; border: 1.5px solid #4f46e5; border-radius: 99px;
+      font-family: inherit; font-size: 0.93rem; font-weight: 900;
+      cursor: pointer; transition: all .15s;
+    }
+    .retry-btn:hover { background: #1e293b; border-color: #6366f1; }
+
+    footer { margin-top: 40px; color: #334155; font-size: 0.73rem; font-weight: 700; text-align: center; }
+
+    @media (max-width: 480px) {
+      .card, .results { padding: 22px 16px 18px; }
+      .question-text { font-size: 0.97rem; }
+      .opt-btn { font-size: 0.85rem; padding: 11px 13px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <span class="icon">⚙️</span>
+  <h1>Quiz · Ingeniería 3D</h1>
+  <p class="sub">5TO GRADO · 10 PREGUNTAS · BAMBU LAB A1 + TINKERCAD</p>
+</header>
+
+<div class="card" id="quiz-card">
+  <div class="prog-bar-wrap">
+    <div class="prog-labels">
+      <span class="current" id="prog-text">Pregunta 1 de 10</span>
+      <span id="score-label">0 correctas</span>
+    </div>
+    <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="q-badge" id="q-badge"></div>
+  <div class="question-text" id="q-text"></div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">Siguiente →</button>
+</div>
+
+<div class="results" id="results">
+  <span class="res-icon" id="res-icon">🏆</span>
+  <div class="res-score" id="res-score">10/10</div>
+  <div class="res-label">respuestas correctas</div>
+  <span class="res-stars" id="res-stars">★★★★★</span>
+  <div class="res-msg" id="res-msg"></div>
+  <button class="retry-btn" onclick="restart()">🔁 Intentar de nuevo</button>
+</div>
+
+<footer>Ingeniería 3D · 5to Grado · Kodingo School</footer>
+
+<script>
+const BADGE_COLORS = {
+  inv:  { bg:'rgba(20,184,166,.18)',  color:'#5eead4', label:'🔍 Ing. Inversa' },
+  tol:  { bg:'rgba(99,102,241,.18)',  color:'#a5b4fc', label:'📏 Tolerancias' },
+  opt:  { bg:'rgba(245,158,11,.18)',  color:'#fcd34d', label:'⚡ Optimización' },
+  func: { bg:'rgba(249,115,22,.18)',  color:'#fdba74', label:'🔩 Funcional' },
+  eng:  { bg:'rgba(236,72,153,.18)',  color:'#f9a8d4', label:'🚀 Ingeniería' }
+};
+
+const QUESTIONS = [
+  {
+    topic:'inv',
+    q:'¿Qué es la ingeniería inversa?',
+    opts:['Diseñar algo completamente nuevo desde cero','Analizar un objeto ya existente para entender cómo fue diseñado','Corregir errores en un diseño previo'],
+    correct:1,
+    ok:'¡Exacto! La ingeniería inversa parte del objeto terminado y trabaja "al revés" para entender el diseño.',
+    bad:'No. La ingeniería inversa parte de un objeto existente y lo analiza para entender su diseño original.'
+  },
+  {
+    topic:'inv',
+    q:'Medís un objeto y anotás sus dimensiones en un dibujo con vistas de frente, costado y arriba. Eso se llama...',
+    opts:['Boceto libre','Boceto técnico con vistas ortogonales y cotas','Esquema de montaje'],
+    correct:1,
+    ok:'¡Correcto! Las vistas ortogonales (frente, lateral, superior) más las cotas (medidas) forman un boceto técnico.',
+    bad:'No es boceto libre — ese no tiene medidas ni vistas definidas. Un boceto técnico incluye cotas y 3 vistas ortogonales.'
+  },
+  {
+    topic:'tol',
+    q:'Diseñás un cubo de 30mm en Tinkercad, pero al imprimirlo sale 29.85mm. ¿A qué se debe esa diferencia?',
+    opts:['Error de diseño — pusiste mal la medida','Contracción térmica del PLA al enfriarse','La impresora está descalibrada'],
+    correct:1,
+    ok:'¡Sí! El PLA se encoge un poco al pasar de 220°C a temperatura ambiente. Eso genera un error de ~0.2-0.5%.',
+    bad:'No es un error de diseño. El plástico PLA se contrae al enfriarse — es física, no un error. Se llama contracción térmica.'
+  },
+  {
+    topic:'tol',
+    q:'Querés que dos piezas encajen con un ajuste deslizante (entran fácil, no quedan fijas). ¿Qué clearance usás en PLA?',
+    opts:['0.01mm por lado — casi sin espacio','0.3mm por lado — un poco de juego','1mm por lado — mucho espacio'],
+    correct:1,
+    ok:'¡Bien! 0.25–0.35mm de clearance por lado es el rango típico para ajuste deslizante en PLA con la Bambu A1.',
+    bad:'No. 0.01mm es demasiado poco — las piezas no van a entrar. 1mm es demasiado — van a bailar. El rango correcto para ajuste deslizante en PLA es 0.25–0.35mm por lado.'
+  },
+  {
+    topic:'opt',
+    q:'Imprimís el mismo gancho en 3 orientaciones. ¿Cuál es más resistente a una fuerza hacia abajo?',
+    opts:['La que tiene las capas horizontales (paralelas a la fuerza)','La que tiene las capas verticales (perpendiculares a la fuerza)','Las 3 orientaciones dan exactamente la misma resistencia'],
+    correct:1,
+    ok:'¡Correcto! Las capas perpendiculares a la fuerza no tienen plano de fractura en la dirección de la carga. Es la orientación más resistente.',
+    bad:'No. Cuando las capas son paralelas a la fuerza, la pieza se puede separar entre capas fácilmente. Necesitás las capas perpendiculares a la fuerza.'
+  },
+  {
+    topic:'opt',
+    q:'Querés imprimir un objeto decorativo lo más rápido posible con el mínimo material. ¿Qué patrón de infill elegís?',
+    opts:['Gyroid al 30% — resistente en todas las direcciones','Lightning al 10% — mínimo material, muy rápido','Honeycomb al 50% — fuerte y ligero'],
+    correct:1,
+    ok:'¡Exacto! Lightning usa el mínimo material necesario para soportar las paredes. Ideal para piezas decorativas.',
+    bad:'No. Para un objeto decorativo que no va a recibir fuerzas importantes, Lightning al 10% es lo más eficiente. Gyroid y honeycomb al 30-50% dan más resistencia de la necesaria.'
+  },
+  {
+    topic:'opt',
+    q:'Querés imprimir un objeto con el texto en un color diferente al fondo. ¿Qué función de Bambu Studio usás?',
+    opts:['Cambiar el filamento manualmente a mitad de impresión','"Add Color Change" en la capa donde empieza el texto en relieve','Pintar el texto después con acrílico'],
+    correct:1,
+    ok:'¡Sí! "Add Color Change" en Bambu Studio pausa la impresión en esa capa exacta para cambiar el filamento.',
+    bad:'Cambiar a mano es posible, pero Bambu Studio tiene la función "Add Color Change" que hace la pausa automáticamente en la capa correcta. Mucho más preciso.'
+  },
+  {
+    topic:'func',
+    q:'Diseñás una bisagra impresa en una sola pieza. El eje mide 8mm de diámetro en el diseño. ¿Cuánto deben medir los agujeros donde pasa el eje?',
+    opts:['8.0mm exacto — sin espacio para que quede firme','8.6mm — eje + 0.3mm de clearance por cada lado','10mm — bastante espacio para que se mueva bien'],
+    correct:1,
+    ok:'¡Correcto! 8mm + 0.3mm por lado = 8.6mm. Con ese clearance el eje puede girar libremente sin trabarse.',
+    bad:'No. Con 8.0mm exacto el eje no va a entrar (la contracción lo hace imposible). Con 10mm va a bailar demasiado. 8.6mm (0.3mm de clearance por lado) es el valor correcto para movimiento suave en PLA.'
+  },
+  {
+    topic:'eng',
+    q:'Estás planeando tu proyecto de ingeniería. ¿Cuál de estas es una RESTRICCIÓN, no un requisito?',
+    opts:['"El objeto debe soportar 200g sin doblarse"','"Debe caber en una repisa de 25cm de ancho"','"Tiene que ser fácil de usar para mi hermano de 6 años"'],
+    correct:1,
+    ok:'¡Exacto! Una restricción es un límite externo que no podés cambiar. El ancho de la repisa es un dato fijo del mundo real.',
+    bad:'No. Los requisitos son lo que la solución DEBE hacer. Las restricciones son límites externos que no podés modificar — como el tamaño de la repisa donde tiene que entrar.'
+  },
+  {
+    topic:'eng',
+    q:'Tu proyecto imprimido no cumple uno de los requisitos del Brief. ¿Cuál es la respuesta correcta de un ingeniero?',
+    opts:['Ignorarlo — el proyecto ya está terminado','Documentar qué falló y diseñar la v2 con el problema corregido','Cambiar el requisito para que el objeto lo cumpla'],
+    correct:1,
+    ok:'¡Perfecto! Documentar los fallos y aprender de ellos es el corazón del proceso de ingeniería. La v2 siempre es mejor que la v1.',
+    bad:'No. Ignorar el problema o cambiar el requisito son opciones que no resuelven nada. Un ingeniero documenta qué falló, por qué, y diseña la siguiente versión para corregirlo.'
+  }
+];
+
+const RES = [
+  { stars:'★', icon:'💪', msg:'Seguí estudiando la guía y volvé a intentarlo. Cada intento te acerca más.' },
+  { stars:'★★', icon:'📐', msg:'Vas bien. Repasá los módulos de tolerancias y optimización — ahí están las preguntas más difíciles.' },
+  { stars:'★★★', icon:'⚙️', msg:'Buen trabajo. Ya dominás los conceptos principales de la Ingeniería 3D.' },
+  { stars:'★★★★', icon:'🔩', msg:'¡Excelente! Casi perfecto. Ya pensás como un ingeniero.' },
+  { stars:'★★★★★', icon:'🏆', msg:'¡10 de 10! Perfecto. Dominás tolerancias, orientación, infill y diseño de ingeniería. ¡Sos un crack!' }
+];
+
+let current = 0, score = 0, answered = false;
+
+function render() {
+  const q = QUESTIONS[current];
+  const b = BADGE_COLORS[q.topic];
+  const badge = document.getElementById('q-badge');
+  badge.textContent = b.label;
+  badge.style.background = b.bg;
+  badge.style.color = b.color;
+
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-text').textContent = `Pregunta ${current+1} de ${QUESTIONS.length}`;
+  document.getElementById('score-label').textContent = `${score} correcta${score!==1?'s':''}`;
+  document.getElementById('prog-fill').style.width = `${(current/QUESTIONS.length)*100}%`;
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback'; fb.textContent = '';
+  document.getElementById('next-btn').classList.remove('show');
+  answered = false;
+
+  document.getElementById('options').innerHTML = q.opts.map((opt,i) => `
+    <button class="opt-btn" onclick="answer(${i})" id="opt-${i}">
+      <span class="opt-letter">${['A','B','C'][i]}</span>${opt}
+    </button>`).join('');
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = QUESTIONS[current];
+  const isOk = idx === q.correct;
+  if (isOk) score++;
+
+  document.querySelectorAll('.opt-btn').forEach((b,i) => {
+    b.disabled = true;
+    if (i === q.correct) b.classList.add('correct');
+    else if (i === idx && !isOk) b.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.textContent = (isOk?'✅ ':'❌ ') + (isOk?q.ok:q.bad);
+  fb.className = `feedback show ${isOk?'ok':'bad'}`;
+  document.getElementById('score-label').textContent = `${score} correcta${score!==1?'s':''}`;
+
+  const nb = document.getElementById('next-btn');
+  nb.textContent = current < QUESTIONS.length-1 ? 'Siguiente →' : 'Ver resultado →';
+  nb.classList.add('show');
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= QUESTIONS.length) showResults();
+  else render();
+}
+
+function showResults() {
+  document.getElementById('quiz-card').style.display = 'none';
+  const res = document.getElementById('results');
+  res.classList.add('show');
+  const pct = score / QUESTIONS.length;
+  const tier = pct === 1 ? 4 : pct >= 0.9 ? 3 : pct >= 0.7 ? 2 : pct >= 0.5 ? 1 : 0;
+  const r = RES[tier];
+  document.getElementById('res-score').textContent = `${score}/${QUESTIONS.length}`;
+  document.getElementById('res-stars').textContent = r.stars;
+  document.getElementById('res-icon').textContent = r.icon;
+  document.getElementById('res-msg').textContent = r.msg;
+  document.getElementById('prog-fill').style.width = '100%';
+}
+
+function restart() {
+  current = 0; score = 0; answered = false;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('results').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
