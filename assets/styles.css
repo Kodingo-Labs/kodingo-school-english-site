@@ -117,6 +117,22 @@ body {
 }
 .unit-badge.workshops { background: #cffafe; color: #0e7490; }
 
+.level-badge {
+  font-size: 0.7rem; font-weight: 800;
+  padding: 4px 11px; border-radius: 99px;
+  white-space: nowrap; flex-shrink: 0;
+  letter-spacing: 0.2px;
+}
+
+/* Botón de grado: teal cuando estamos en Talleres */
+body.subject-workshops .kid-btn.active {
+  border-color: #0891b2; background: #0891b2;
+  box-shadow: 0 3px 10px rgba(8,145,178,.3);
+}
+body.subject-workshops .kid-btn:not(.active):hover {
+  border-color: #7dd3fc; color: #0369a1; background: #e0f2fe;
+}
+
 .chevron {
   color: #cbd5e1; font-size: 1.3rem; font-weight: 900;
   transition: transform .25s; flex-shrink: 0;
@@ -145,6 +161,17 @@ body {
   box-shadow: 0 4px 12px rgba(79,70,229,.15);
 }
 .mat-emoji { font-size: 1.4rem; line-height: 1; }
+
+/* Colores por tipo de material (hover) */
+.mat-link.mat-flashcards:hover { border-color: #fcd34d; background: #fffbeb; color: #92400e; }
+.mat-link.mat-matching:hover   { border-color: #6ee7b7; background: #ecfdf5; color: #065f46; }
+.mat-link.mat-story:hover      { border-color: #f9a8d4; background: #fdf2f8; color: #9d174d; }
+.mat-link.mat-game:hover       { border-color: #a5b4fc; background: #eef2ff; color: #4338ca; }
+.mat-link.mat-intro:hover      { border-color: #c4b5fd; background: #f5f3ff; color: #6d28d9; }
+.mat-link.mat-project:hover    { border-color: #7dd3fc; background: #e0f2fe; color: #0369a1; }
+.mat-link.mat-guide:hover      { border-color: #86efac; background: #f0fdf4; color: #15803d; }
+.mat-link.mat-quiz:hover       { border-color: #fca5a5; background: #fef2f2; color: #dc2626; }
+.mat-link.mat-clase:hover      { border-color: #7dd3fc; background: #e0f2fe; color: #0369a1; }
 
 /* ── Lab section (Studio 3D) ─────────────────────────────────────── */
 .lab-section { display: flex; flex-direction: column; gap: 10px; }
